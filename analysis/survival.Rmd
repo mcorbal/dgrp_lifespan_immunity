@@ -81,6 +81,10 @@ data_tidy <-
 
 ## Variation in initial dose throughout experiment
 
+Last two infection dates correspond to the day 35, Block 3 and 4 infections, which corresponds to the top two rows of the survival curves in the next section. 
+
+I'm at a loss as to why this is the case and why the spread is so huge.
+LB agar was made up the same as always with same amount of erythromycin added. Bacterial culture was inverted plenty of times before filling the needle...
 
 
 ```{r time0 dose, echo=F, fig.cap="Initial dose variation over course of experiment"}
