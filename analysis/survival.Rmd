@@ -1,0 +1,922 @@
+---
+title: "Survival - plots and statistical analysis"
+subtitle: "Comparative survival to *P. rettgeri* challenge of young and old flies"
+author: "Mary-Kate Corbally"
+date: "2021-06-08"
+output: 
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_caption: true
+editor_options:
+  chunk_output_type: console
+---
+
+This document was created in R Markdown and translated into html using the R package 'R knitr'. To unveil or hide code behind graphical and tabular outputs, toggle the **Code** buttons. 
+
+## Load Libraries, datastes and then tidy
+
+```{r libraries, message=F, warning=F, results='hide'}
+library(survival) # survival functions
+library(survminer) # survival functions
+library(survivalAnalysis) # survival functions
+library(tidyverse) # data tidying
+library(tidytidbits) # data tidying
+library(DT) # nice data tables
+library(plyr) # data import and tidying
+library(dplyr) # data tidying
+library(coxme) # Cox mixed effect analysis 
+library(gtsummary) # Analytic table summaries
+library(multcomp) # Linear modeling 
+library(scales) # visualization
+library(gridExtra) # arrange multiple grid plots
+library(grid) # classic graphic functions 
+library(ggplot2) # graphic functions
+library(kableExtra) # scrolleable tables
+library(ggpubr) # level-up plots 
+library(purrr) # For mapping through list
+library(broom) # Extraction of mapped function calls into dataframes
+library(viridis) # colourblind colour palette 
+
+select = dplyr::select
+mutate = dplyr::mutate
+Surv = survival::Surv
+survfit = survival::survfit
+coxme = coxme::coxme
+
+# Font
+SuperSmallfont= 6
+Smallfont= 10
+Mediumfont= 12
+Largefont= 14
+verylargefont = 16
+pointsize= 0.7
+linesize=1.2
+meansize = 1.5
+Margin=c(0,0,0,0)
+
+fontsizeaxes = 12
+fontsizeaxes2 = 10
+
+
+# DATA import
+## 8 representing each of 4 block per time point.
+data_path = "data"
+files <- list.files(path = data_path, pattern = "^S.*\\.csv$", full.names = T)
+files
+
+## Use 'R ldply' to apply read.csv function to all elements and add to dataframe 
+data_all <- ldply(files, read_csv)
+
+# DATA tidy
+## Select non-empty columns and modify variable classes
+data_tidy <-
+  data_all %>% 
+  select(1:21) %>% 
+  mutate(across(where(is.character), as.factor)) %>% 
+  mutate(across(Line, as.factor))
+         
+```
+
+## Variation in initial dose throughout experiment
+
+
+
+```{r time0 dose, echo=F, fig.cap="Initial dose variation over course of experiment"}
+Dose_data <- read.csv("data/Time0.csv", header = T)
+
+Dose_sum <- 
+   Dose_data %>% 
+   group_by(Date_of_infection) %>% 
+   dplyr::summarise(Mean = mean(OD),
+                    sd = sd(OD)) %>% 
+   complete(Date_of_infection)
+      
+
+
+Dose_sum$Date_of_infection <- 
+  factor(Dose_sum$Date_of_infection, levels = c("10/04/2021", "16/04/2021", "22/04/2021", "28/04/2021",
+                                                "05/05/2021", "11/05/2021", "17/05/2021", "23/05/2021"))
+
+Initial_dose <-
+   ggplot(Dose_sum, aes(Date_of_infection, Mean)) +
+   geom_point(color = "red", size = 6)+
+   geom_errorbar(aes(ymin=Mean-sd, ymax =Mean+sd))+
+   scale_x_discrete("Date of Infection")+
+   scale_y_continuous("Initial Dose (CFU/fly)")
+   
+Initial_dose
+```
+
+
+## Perform CoxME and plot survival curves
+ 
+```{r functions, results= F }
+# Function to extract CoxME table
+
+ extract_coxme_table <- function (mod){
+    beta <- mod[["coefficients"]]
+    nvar <- length(beta)
+    nfrail <- nrow(mod$var) - nvar
+    se <- sqrt(diag(mod$var)[nfrail + 1:nvar])
+    z<- round(beta/se, 2)
+    p<- format(as.numeric(pchisq((beta/se)^2, 1,lower.tail = F)), 4)
+    table=data.frame(cbind(beta,se,z,p))
+    return(table)
+ }
+
+
+#Function to extract survival data to plot
+ggplotprep2 <- function(x, times){
+  d <- data.frame(condition=rep(names(x$strata), x$strata), time=x$time, survival=x$surv, upper=x$upper, lower=x$lower)
+  fillup0 <- function(s) rbind(c(condition=s, time=0, survival=1, upper=1, lower=1), d[d$condition==s, ], deparse.level = 0)
+  
+  indexes <- function(x, time) {
+    if(x%in%time) return(x)
+    return(floor(time[which.min(abs(time[time<x]-x))]))
+  }
+  
+  fillup <- function(s) {
+    d.temp <- d[d$condition==s, ]
+    time <- as.numeric(d.temp$time)
+    id <- sapply(times, indexes, time=time)
+    d.temp <- d.temp[match(id, time), ]
+    d.temp$time <- times
+    return(d.temp)
+  }
+  
+  if(times[1]==0) d <- do.call("rbind", sapply(names(x$strata), fillup0, simplify=F))
+  d <- do.call("rbind", sapply(names(x$strata), fillup, simplify=F))
+  clean.name <- function(name) unlist(lapply(strsplit(as.character(name), split="="), function(x) x[2]))
+  d <- data.frame(Condition=clean.name(d$condition), Time=as.numeric(d$time), Survival=as.numeric(d$survival), upper=as.numeric(d$upper), lower=as.numeric(d$lower))
+  return(d)
+}
+
+# Function to generate labels with n numbers
+paste_n <- function(y) {
+new <-
+  n.df %>% 
+  filter(Line == y)
+new$id <- paste(new$Sex, new$Age, new$n.number, sep = " ")
+
+y_labs <- c(paste(new$id[1]),
+      paste(new$id[2]),
+      paste(new$id[3]),
+      paste(new$id[4]))
+y_labs
+}
+
+paste_n_block <-function(y,x) {
+new <-
+  n.df %>% 
+  filter(Line == y & Block == x)
+new$id <- paste(new$Sex, new$Age, new$n.number, sep = " ")
+
+y_labs <- c(paste(new$id[1]),
+      paste(new$id[2]),
+      paste(new$id[3]),
+      paste(new$id[4]))
+y_labs
+}
+  
+
+```
+
+
+```{r n number}
+# use survobject to get n number and subsequent dataframe  
+
+data_grouped <-
+  data_tidy %>% 
+  unite("line_sex_age", c(4,7,9), sep = "_", remove = F) %>% 
+  mutate(across(line_sex_age, as.factor))
+
+surv_group <- survfit(Surv(time= Time_of_death, event = Censor)
+                    ~ line_sex_age, data = data_grouped)
+
+# Create df with n numbers via line_sex_age
+conditions <- as.vector(levels(data_grouped$line_sex_age))
+n.number <- as.vector(surv_group[["n"]])
+df <- data.frame(conditions, n.number)
+
+n.df <- 
+  df %>% 
+  separate(1, c("Line", "Sex", "Age"))
+
+
+
+# FOR PLOTTING
+# Create grouping variable 
+
+```
+
+```{r survplot all, echo=F, fig.cap="Survival Plots for all Lines, suffixed with block number"}
+# FOR PLOTTING
+# Create 'condition' grouping variable 
+data_grouped <-
+  data_tidy %>% 
+  unite("Group", c(7,9), sep = "_", remove = F) %>% 
+  mutate(across(Group, as.factor))
+
+#create time argument for ggplotprep2
+time_check = sort(unique(data_grouped$Time_to_death))
+
+#Create dataframe with extracted survival probability for groups
+Grouped_surv<-
+  data_grouped %>%
+  unite("Line_Block", c(4,9), sep = "_", remove = F) %>% #grouping variable to handle block control
+  group_by(Line_Block) %>% 
+  nest() %>% 
+  dplyr::mutate(Surv_object = map(data, ~survfit(Surv(time= Time_to_death, event = Censor) ~ Group,  data=.x))) %>% 
+  dplyr::mutate(survival_plot =  map(Surv_object, ggplotprep2, times=c(0,time_check))) %>% 
+  ungroup() %>% 
+  transmute(Line_Block, survival_plot) %>% 
+  unnest(survival_plot)
+
+# reorder values for faceting 
+Grouped_surv$Line_Block <- 
+  factor(Grouped_surv$Line_Block, levels = c("821_4", "386_4", "730_4", "732_4","821_3", 
+                                             "517_3", "907_3", "59_3", "821_1", "109_1", 
+                                             "287_1", "304_1", "821_2", "21_2", "897_2"))
+
+ survplot_all <-
+   ggplot(subset(Grouped_surv,Survival!=0), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   facet_wrap(~Line_Block)+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+   scale_color_viridis(name="Group",
+                     labels = c("Female 10 do", "Female 35 do", "Male 10  do", "Male 35 do"),
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=c("Female 10 do", "Female 35 do", "Male 10  do", "Male 35 do"))+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_linedraw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+  
+survplot_all
+ 
+```
+
+```{r coxph analysis, fig.cap="Corresponding regression coefficients"}
+
+
+data_tidy$Age_at_infection <- as.factor(data_tidy$Age_at_infection)
+
+coxph<-
+  data_tidy%>%
+   unite("Line_Block", c(4,8), sep = "_", remove = F) %>% #grouping variable to handle block control
+  group_by(Line_Block)%>% 
+  nest() %>% 
+  dplyr::mutate(cox_object = map(data, 
+                                 ~coxph(Surv(time = Time_to_death, event = Censor) ~
+                                                 Sex + Age_at_infection +Sex*Age_at_infection, data=.x))) %>% 
+  dplyr::mutate(cox_tidy = map(cox_object, extract_coxme_table)) %>% 
+  ungroup() %>% 
+  transmute(Line_Block, cox_tidy) %>% 
+  unnest(cox_tidy)
+
+# convert Line_Block to factor
+coxph$Line_Block <- as.factor(as.character(coxph$Line_Block))
+
+coxph_ouput <-
+   coxph %>% 
+   mutate(across(where(is.character), as.numeric))
+
+coxph_ouput$Term <- rep(c("Sex", "Age", "Sex*Age"), each=1, length.out = 45)
+coxph_ouput$HR <- exp(coxph_ouput$beta)
+coxph_ouput$Line_Block <- 
+  factor(coxph_ouput$Line_Block , levels = c("821_4", "386_4", "730_4", "732_4","821_3", 
+                                             "517_3", "907_3", "59_3", "821_1", "109_1", 
+                                             "287_1", "304_1", "821_2", "21_2", "897_2"))
+
+   
+test <- 
+   ggplot(coxph_ouput, aes(x = Term, y=beta, colour = Term))+
+   scale_colour_viridis(discrete = T, option = "viridis")+
+   facet_wrap(~Line_Block)+
+   geom_point()+
+   geom_errorbar(aes(ymin = beta-se, ymax = beta+se))+
+   theme_linedraw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+   
+test
+```
+
+## Individual Survival Curves
+
+```{r survplot individual, echo =F}
+
+data_grouped <-
+  data_tidy %>% 
+  unite("Group", c(7,9), sep = "_") %>% 
+  mutate(across(Group, as.factor))
+
+# Filterable dataframe to create individual plots
+individ_ready<-
+  data_grouped %>%
+  group_by(Line, Block) %>% 
+  nest() %>% 
+  dplyr::mutate(Surv_object = map(data, ~survfit(Surv(time= Time_to_death, event = Censor) ~ Group,  data=.x))) %>% 
+  dplyr::mutate(survival_plot =  map(Surv_object, ggplotprep2, times=c(0,time_check))) %>% 
+  ungroup() %>% 
+  transmute(Line, Block, survival_plot) %>% 
+  unnest(survival_plot) %>% 
+  group_by(Line, Block) %>% 
+  filter(Survival != 0) 
+
+
+
+#line 21 labels
+Line21labs <- paste_n(21)
+Line21 <-
+  ggplot(subset(individ_ready, Line == "21"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 21")+
+   scale_color_viridis(name="Group",
+                     labels = Line21labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line21labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line21
+
+#line 21 labels
+Line109labs <- paste_n(109)
+Line109 <-
+  ggplot(subset(individ_ready, Line == "109"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 109")+
+   scale_color_viridis(name="Group",
+                     labels = Line109labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line109labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line109
+
+# Line 287
+Line287labs <- paste_n(287)
+Line287 <-
+  ggplot(subset(individ_ready, Line == "287"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 287")+
+   scale_color_viridis(name="Group",
+                     labels = Line287labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line287labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line287
+
+
+# Line 304
+Line304labs <- paste_n(304)
+Line304 <-
+  ggplot(subset(individ_ready, Line == "304"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 304")+
+   scale_color_viridis(name="Group",
+                     labels = Line304labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line304labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line304
+
+# Line 386
+Line386labs <- paste_n(386)
+Line386 <-
+  ggplot(subset(individ_ready, Line == "386"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 386")+
+   scale_color_viridis(name="Group",
+                     labels = Line386labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line386labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line386
+
+# Line 517
+Line517labs <- paste_n(517)
+Line517 <-
+  ggplot(subset(individ_ready, Line == "517"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 517")+
+   scale_color_viridis(name="Group",
+                     labels = Line517labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line517labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line517
+
+# Line
+Line59labs <- paste_n(59)
+Line59 <-
+  ggplot(subset(individ_ready, Line == "59"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 59")+
+   scale_color_viridis(name="Group",
+                     labels = Line59labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line59labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line59
+
+# Line 730
+Line730labs <- paste_n(730)
+Line730 <-
+  ggplot(subset(individ_ready, Line == "730"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 730")+
+   scale_color_viridis(name="Group",
+                     labels = Line730labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line730labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line730
+
+Line730labs <- paste_n(730)
+Line730 <-
+  ggplot(subset(individ_ready, Line == "730"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 730")+
+   scale_color_viridis(name="Group",
+                     labels = Line730labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line730labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line730
+
+# Line 732
+Line732labs <- paste_n(732)
+Line732 <-
+  ggplot(subset(individ_ready, Line == "732"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 732")+
+   scale_color_viridis(name="Group",
+                     labels = Line732labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line732labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line732
+
+# Line 897
+Line897labs <- paste_n(897)
+Line897 <-
+  ggplot(subset(individ_ready, Line == "897"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 897")+
+   scale_color_viridis(name="Group",
+                     labels = Line897labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line897labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line897
+
+# Line 907 
+Line907labs <- paste_n(907)
+Line907 <-
+  ggplot(subset(individ_ready, Line == "907"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 907")+
+   scale_color_viridis(name="Group",
+                     labels = Line907labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line907labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line907
+
+
+# Create new function fot label extraction - block-specific for block control
+data_grouped <-
+  data_tidy %>% 
+  unite("line_sex_block_age", c(4,7,8,9), sep = "_", remove = F) %>% 
+  mutate(across(line_sex_block_age, as.factor))
+
+surv_group <- survfit(Surv(time= Time_to_death, event = Censor)
+                    ~ line_sex_block_age, data = data_grouped)
+
+conditions <- as.vector(levels(data_grouped$line_sex_block_age))
+n.number <- as.vector(surv_group[["n"]])
+df <- data.frame(conditions, n.number)
+n.df <- 
+  df %>% 
+  separate(1, c("Line", "Sex", "Block","Age"))
+
+# Line 821 - Block 1 
+Line821b1labs <- paste_n_block(821,1)
+Line821b1 <-
+  ggplot(subset(individ_ready, Line == "821" & Block == "1"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 821 block 1")+
+   scale_color_viridis(name="Group",
+                     labels = Line821b1labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line821b1labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line821b1
+
+# Line 821 - block 2
+Line821b2labs <- paste_n_block(821,2)
+Line821b2 <-
+  ggplot(subset(individ_ready, Line == "821" & Block == "2"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 821 block 2")+
+   scale_color_viridis(name="Group",
+                     labels = Line821b2labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line821b2labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line821b2
+
+# Line 821 - block 3
+Line821b3labs <- paste_n_block(821,3)
+Line821b3 <-
+  ggplot(subset(individ_ready, Line == "821" & Block == "3"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 821 block 3")+
+   scale_color_viridis(name="Group",
+                     labels = Line821b3labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line821b3labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line821b3
+
+# Line 821 - block 4
+Line821b4labs <- paste_n_block(821,4)
+Line821b4 <-
+  ggplot(subset(individ_ready, Line == "821" & Block == "4"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
+   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
+   geom_point(size = 0.7)+
+  ggtitle("Line 821 block 4")+
+   scale_color_viridis(name="Group",
+                     labels = Line821b4labs,
+                     option = "viridis",
+                     discrete = T)+
+   scale_linetype_manual(name="Group",
+                        values=c("solid","dashed", "solid","dashed"),
+                        labels=Line821b4labs)+
+   scale_x_continuous("Hours Post Injection",
+                     limits=c(0, 124),
+                     breaks=c(seq(0,124,by=24)))+
+   scale_y_continuous("Proportion of survivors",
+                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
+   labs(colour = "Group", linetype = "Group")+
+   theme_bw()+
+   theme(strip.text.x = element_text(size=10),
+         legend.direction = "vertical", 
+         legend.box = "horizontal",
+         legend.title = element_text(face="italic",size=Largefont), 
+         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
+         legend.text = element_text(size=Mediumfont),
+         legend.background = element_rect(fill=NA),
+         plot.margin = unit(c(0,0,1.2,0), "cm"))+
+   guides(shape=guide_legend(ncol=1),
+         fill=guide_legend(ncol=1),
+         col=guide_legend(ncol=1))
+Line821b4
+
+```
+
+
+
+
