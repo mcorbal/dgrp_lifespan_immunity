@@ -1,7 +1,7 @@
-name: "dgrp_lifespan_immunity"
+name: dgrp_lifespan_immunity
 output_dir: ../docs
 navbar:
-  title: "dgrp_lifespan_immunity"
+  title: dgrp_lifespan_immunity
   left:
   - text: Home
     href: index.html
@@ -9,9 +9,13 @@ navbar:
     href: about.html
   - text: License
     href: license.html
+  right:
+  - icon: fa-github
+    text: Source code
+    href: https://github.com/mcorbal/dgrp_lifespan_immunity
 output:
   workflowr::wflow_html:
     toc: yes
     toc_float: yes
-    theme: cosmo
+    theme: flatly
     highlight: textmate
