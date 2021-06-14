@@ -28,6 +28,8 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -372,7 +374,13 @@ div.tocify {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/mcorbal/dgrp_lifespan_immunity">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -509,16 +517,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong99be2ef"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 99be2ef </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytree75923c1f5903eff1ed7bd583c5e5963decffb4a9targetblank75923c1a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/75923c1f5903eff1ed7bd583c5e5963decffb4a9" target="_blank">75923c1</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong99be2ef" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytree75923c1f5903eff1ed7bd583c5e5963decffb4a9targetblank75923c1a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 99be2ef. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/75923c1f5903eff1ed7bd583c5e5963decffb4a9" target="_blank">75923c1</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -540,9 +548,6 @@ Untracked files:
     Untracked:  data/SURV_D213.csv
     Untracked:  data/SURV_D214.csv
     Untracked:  data/Time0.csv
-
-Unstaged changes:
-    Modified:   analysis/_site.yml
 
 </code></pre>
 <p>
@@ -586,7 +591,41 @@ Message
 Rmd
 </td>
 <td>
-99be2ef
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/75923c1f5903eff1ed7bd583c5e5963decffb4a9/analysis/survival.Rmd" target="_blank">75923c1</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+<td>
+Dose description in survivAL files
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mcorbal/dgrp_lifespan_immunity/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/survival.html" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/99be2efeb5eb3f5658e88f5122343395bbf52283/analysis/survival.Rmd" target="_blank">99be2ef</a>
 </td>
 <td>
 mcorbal
@@ -669,11 +708,50 @@ data_tidy &lt;-
 </div>
 <div id="variation-in-initial-dose-throughout-experiment" class="section level2">
 <h2>Variation in initial dose throughout experiment</h2>
+<p>Last two infection dates correspond to the day 35, Block 3 and 4 infections, which corresponds to the top two rows of the survival curves in the next section.</p>
+<p>I’m at a loss as to why this is the case and why the spread is so huge. LB agar was made up the same as always with same amount of erythromycin added. Bacterial culture was inverted plenty of times before filling the needle…</p>
 <div class="figure" style="text-align: center">
 <img src="figure/survival.Rmd/time0%20dose-1.png" alt="Initial dose variation over course of experiment" width="672" />
 <p class="caption">
 Initial dose variation over course of experiment
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-time0-dose-1">
+Past versions of “time0 dose-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-time0-dose-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/time0 dose-1.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 <div id="perform-coxme-and-plot-survival-curves" class="section level2">
@@ -773,6 +851,43 @@ n.df &lt;-
 Survival Plots for all Lines, suffixed with block number
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-all-1">
+Past versions of “survplot all-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot all-1.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>data_tidy$Age_at_infection &lt;- as.factor(data_tidy$Age_at_infection)
 
 coxph&lt;-
@@ -829,10 +944,654 @@ test</code></pre>
 Corresponding regression coefficients
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-coxph-analysis-1">
+Past versions of “coxph analysis-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-coxph-analysis-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/coxph analysis-1.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="individual-survival-curves" class="section level2">
 <h2>Individual Survival Curves</h2>
-<p><img src="figure/survival.Rmd/survplot%20individual-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/survival.Rmd/survplot%20individual-16.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/survival.Rmd/survplot%20individual-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-1">
+Past versions of “survplot individual-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-1.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-2">
+Past versions of “survplot individual-2.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-2.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-3">
+Past versions of “survplot individual-3.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-3.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-4">
+Past versions of “survplot individual-4.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-4.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-5">
+Past versions of “survplot individual-5.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-5.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-6.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-6">
+Past versions of “survplot individual-6.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-6" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-6.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-7.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-7">
+Past versions of “survplot individual-7.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-7" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-7.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-8.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-8">
+Past versions of “survplot individual-8.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-8" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-8.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-9.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-9">
+Past versions of “survplot individual-9.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-9" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-9.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-10.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-10">
+Past versions of “survplot individual-10.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-10" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-10.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-11.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-11">
+Past versions of “survplot individual-11.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-11" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-11.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-12.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-12">
+Past versions of “survplot individual-12.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-12" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-12.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-13.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-13">
+Past versions of “survplot individual-13.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-13" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-13.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-14.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-14">
+Past versions of “survplot individual-14.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-14" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-14.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-15.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-15">
+Past versions of “survplot individual-15.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-15" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-15.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/survival.Rmd/survplot%20individual-16.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-16">
+Past versions of “survplot individual-16.png”
+</button>
+</p>
+<div id="fig-no-spaces-survplot-individual-16" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-16.png" target="_blank">00b6b8d</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
