@@ -168,13 +168,13 @@ y_labs
 }
 ```  
 
-## Deciding how to handle Flies stuck to food 
+## Deciding how to handle Flies stuck to food - Line 897
 
-Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, were suck to the food from quite early on. While it seems a lot of flies do travel to food to die, these flies while young were very much alive but just stuck.
+Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, got stuck to the food from quite early on.
 
-Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis. This helps visualise how much this line was susceptible to getting stuck.
+Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis, just to visualise the susceptibility of this line. 
 
-```{r quick plot survcurv, fig.cap="Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
+```{r quick plot survcurv, warning=F, message=F, fig.cap="Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
 
 surv_object <- Surv(data_tidy$Age, data_tidy$Event)
 fit <- survfit(surv_object ~ Sex, data_tidy)
@@ -206,10 +206,10 @@ dual_axes <-
            stat = "identity", size=1)+
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   scale_color_manual(name="Group",
-                     labels = c("Female", "Male"),
+                     labels = c("Female (835)", "Male (935)"),
                      values = c("firebrick", "navy"))+
   scale_fill_manual(name="Group",
-                     labels = c("Female", "Male"),
+                     labels = c("Female (835)", "Male (935)"),
                      values = c("#FF6666", "#333399"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1.1),
@@ -225,7 +225,7 @@ dual_axes
 
 If I include the flies on the food in the lifespan as deaths, the survival curve looks very different with females having a much lower median lifespan. 
 
-```{r 897 food-stuck included, fig.cap="Surv curv of Line 897 with food-stuck included as deaths"}
+```{r 897 food-stuck included, warning=F,message=F, fig.cap="Surv curv of Line 897 with food-stuck included as deaths"}
 data_include_stuck <-
   data_long %>% 
   separate(5, c("Sex", "Event")) %>% 
@@ -255,7 +255,7 @@ Surv_included <-
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   ggtitle("Line 897 - Lifespan")+
   scale_color_manual(name="Group",
-                     labels = c("Female", "Male"),
+                     labels = c("Female (835)", "Male (935)"),
                      values = c("firebrick", "navy"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1),
@@ -269,7 +269,7 @@ Surv_included
 
 This line didn't have as many flies stuck to the food from the get-go, but did have an uptick as deaths increase, unsurprisingly.
 
-```{r line 287 plot prep, echo=F, hide=T, warning=F}
+```{r line 287 plot prep, echo=F, message=F,, warning=F}
 
 data_287 <- read.csv(files[1])
 
@@ -332,10 +332,13 @@ include_287 <- expand_included(data_287)
 ```
 
 
-```{r quick plot 287 survcurv, fig.cap="Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
+```{r quick plot 287 survcurv, warning=F, fig.cap="Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
 
 surv_object_2 <- Surv(censor_287$Age, censor_287$Event)
 fit_2 <- survfit(surv_object_2 ~ Sex, censor_287)
+
+female_287n <- as.character(fit_2[["n"]][1])
+male_287n <- as.character(fit_2[["n"]][2])
 
 time_check = sort(unique(censor_287$Age))
 Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
@@ -361,10 +364,10 @@ dual_axes_287<-
            stat = "identity", size=1)+
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   scale_color_manual(name="Group",
-                     labels = c("Female", "Male"),
+                     labels = c("Female (1031)", "Male (868)"),
                      values = c("firebrick", "navy"))+
   scale_fill_manual(name="Group",
-                     labels = c("Female", "Male"),
+                     labels = c("Female (1031)", "Male (868)"),
                      values = c("#FF6666", "#333399"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1.1),
@@ -376,7 +379,7 @@ dual_axes_287
 ```
 
 
-```{r line 287 included, fig.cap="Surv curv of Line 287 with food-stuck included as deaths"}
+```{r line 287 included,message=F, fig.cap="Surv curv of Line 287 with food-stuck included as deaths"}
 surv_object_2 <- Surv(include_287$Age, include_287$Event)
 fit_2 <- survfit(surv_object_2 ~ Sex, include_287)
 
@@ -391,7 +394,7 @@ Surv_included <-
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   ggtitle("Line 287 - Lifespan (including stuck)")+
   scale_color_manual(name="Group",
-                     labels = c("Female", "Male"),
+                     labels = c("Female (1031)", "Male (868)"),
                      values = c("firebrick", "navy"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1),
