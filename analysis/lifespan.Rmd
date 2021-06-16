@@ -1,0 +1,404 @@
+---
+title: "lifespan"
+author: "mcorbal"
+date: "2021-06-14"
+output: 
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    fig_caption: true
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+This document was created in R Markdown and translated into html using the R package 'R knitr'. To unveil or hide code behind graphical and tabular outputs, toggle the **Code** buttons. 
+
+## Load Libraries, datastes and then tidy
+
+```{r libraries, message=F, warning=F, results='hide'}
+library(survival) # survival functions
+library(survminer) # survival functions
+library(survivalAnalysis) # survival functions
+library(tidyverse) # data tidying
+library(tidytidbits) # data tidying
+library(DT) # nice data tables
+library(plyr) # data import and tidying
+library(dplyr) # data tidying
+library(coxme) # Cox mixed effect analysis 
+library(gtsummary) # Analytic table summaries
+library(multcomp) # Linear modeling 
+library(scales) # visualization
+library(gridExtra) # arrange multiple grid plots
+library(grid) # classic graphic functions 
+library(ggplot2) # graphic functions
+library(kableExtra) # scrolleable tables
+library(ggpubr) # level-up plots 
+library(purrr) # For mapping through list
+library(broom) # Extraction of mapped function calls into dataframes
+library(viridis) # colourblind colour palette 
+
+select = dplyr::select
+mutate = dplyr::mutate
+Surv = survival::Surv
+survfit = survival::survfit
+coxme = coxme::coxme
+
+
+SuperSmallfont= 6
+Smallfont= 10
+Mediumfont= 12
+Largefont= 14
+verylargefont = 16
+pointsize= 0.7
+linesize=1.2
+meansize = 1.5
+Margin=c(0,0,0,0)
+
+fontsizeaxes = 12
+fontsizeaxes2 = 10
+
+
+# DATA import
+## 12 representing each of line of each block (821 repeated 4x)
+data_path = "data"
+files <- list.files(path = data_path, pattern = "^L.*\\.csv$", full.names = T)
+files
+
+## Use 'R ldply' to apply read.csv function to all elements and add to dataframe 
+data_897<- read_csv(files[2])
+
+
+data<-
+  pivot_longer(data_897,
+    cols = contains("ale"), 
+    names_to = "Group",
+    values_to = "Freq"
+  )
+
+data_long <-
+  data[rep(row.names(data), data$Freq), 1:5]
+
+data_tidy <-
+  data_long %>% 
+  separate(5, c("Sex", "Event")) %>% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %>% 
+  mutate(Group = ifelse(Event == 0, paste("censor"),
+                        ifelse(Event == 1, paste("death"),
+                               paste("stuck")))) %>% 
+  mutate(Event = recode(Event, 
+                      '0' = 0,
+                      '1' = 1,
+                      '2' = 0))
+  
+
+```
+
+```{r functions, results= F }
+# Function to extract CoxME table
+
+ extract_coxme_table <- function (mod){
+    beta <- mod[["coefficients"]]
+    nvar <- length(beta)
+    nfrail <- nrow(mod$var) - nvar
+    se <- sqrt(diag(mod$var)[nfrail + 1:nvar])
+    z<- round(beta/se, 2)
+    p<- format(as.numeric(pchisq((beta/se)^2, 1,lower.tail = F)), 4)
+    table=data.frame(cbind(beta,se,z,p))
+    return(table)
+ }
+
+
+#Function to extract survival data to plot
+ggplotprep2 <- function(x, times){
+  d <- data.frame(condition=rep(names(x$strata), x$strata), time=x$time, survival=x$surv, upper=x$upper, lower=x$lower)
+  fillup0 <- function(s) rbind(c(condition=s, time=0, survival=1, upper=1, lower=1), d[d$condition==s, ], deparse.level = 0)
+  
+  indexes <- function(x, time) {
+    if(x%in%time) return(x)
+    return(floor(time[which.min(abs(time[time<x]-x))]))
+  }
+  
+  fillup <- function(s) {
+    d.temp <- d[d$condition==s, ]
+    time <- as.numeric(d.temp$time)
+    id <- sapply(times, indexes, time=time)
+    d.temp <- d.temp[match(id, time), ]
+    d.temp$time <- times
+    return(d.temp)
+  }
+  
+  if(times[1]==0) d <- do.call("rbind", sapply(names(x$strata), fillup0, simplify=F))
+  d <- do.call("rbind", sapply(names(x$strata), fillup, simplify=F))
+  clean.name <- function(name) unlist(lapply(strsplit(as.character(name), split="="), function(x) x[2]))
+  d <- data.frame(Condition=clean.name(d$condition), Time=as.numeric(d$time), Survival=as.numeric(d$survival), upper=as.numeric(d$upper), lower=as.numeric(d$lower))
+  return(d)
+}
+
+# Function to generate labels with n numbers
+paste_n <- function(y) {
+new <-
+  n.df %>% 
+  filter(Line == y)
+new$id <- paste(new$Sex, new$Age, new$n.number, sep = " ")
+
+y_labs <- c(paste(new$id[1]),
+      paste(new$id[2]),
+      paste(new$id[3]),
+      paste(new$id[4]))
+y_labs
+}
+
+paste_n_block <-function(y,x) {
+new <-
+  n.df %>% 
+  filter(Line == y & Block == x)
+new$id <- paste(new$Sex, new$Age, new$n.number, sep = " ")
+
+y_labs <- c(paste(new$id[1]),
+      paste(new$id[2]),
+      paste(new$id[3]),
+      paste(new$id[4]))
+y_labs
+}
+```  
+
+## Deciding how to handle Flies stuck to food 
+
+Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, were suck to the food from quite early on. While it seems a lot of flies do travel to food to die, these flies while young were very much alive but just stuck.
+
+Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis. This helps visualise how much this line was susceptible to getting stuck.
+
+```{r quick plot survcurv, fig.cap="Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
+
+surv_object <- Surv(data_tidy$Age, data_tidy$Event)
+fit <- survfit(surv_object ~ Sex, data_tidy)
+
+time_check = sort(unique(data_tidy$Age))
+Survival_table <- ggplotprep2(fit, times = c(0,time_check))
+Survival_table$Sex <- Survival_table$Condition
+Survival_table$Condition <- NULL
+
+# Extract 'stuck' rows and count for addition to survival table 
+stuck <-
+  data_tidy %>% 
+  filter(Group == "stuck") %>% 
+  mutate(Group = recode(Group, 'stuck' = 1)) %>% 
+  group_by(Age, Sex) %>% 
+  dplyr::summarise(Stuck= n()) %>% 
+  ungroup() %>% 
+  mutate(Time = Age,
+         Age = NULL)
+
+dual_data<-
+  merge(Survival_table, stuck, by=c("Time", "Sex"), all = T)
+  
+coeff <- 40
+# Plot a dual_axis figure with df where flies in food have been censored 
+dual_axes <- 
+  ggplot(dual_data, aes(x=Time))+
+  geom_bar(aes(y=Stuck/40, fill = as.factor(Sex)), alpha = 0.4,
+           stat = "identity", size=1)+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+  scale_fill_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("#FF6666", "#333399"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1.1),
+                      breaks=c(seq(0,1.1,by=0.1)),
+                      sec.axis = sec_axis(~.*coeff, name = "Number of flies stuck to food"))+
+   theme_linedraw()
+  
+dual_axes
+
+
+```
+
+
+If I include the flies on the food in the lifespan as deaths, the survival curve looks very different with females having a much lower median lifespan. 
+
+```{r 897 food-stuck included, fig.cap="Surv curv of Line 897 with food-stuck included as deaths"}
+data_include_stuck <-
+  data_long %>% 
+  separate(5, c("Sex", "Event")) %>% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %>% 
+  mutate(Group = ifelse(Event == 0, paste("censor"),
+                        ifelse(Event == 1, paste("death"),
+                               paste("stuck")))) %>% 
+  mutate(Event = recode(Event, 
+                      '0' = 0,
+                      '1' = 1,
+                      '2' = 1))
+
+surv_object_2 <- Surv(data_include_stuck $Age, data_include_stuck $Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, data_include_stuck )
+
+time_check = sort(unique(data_include_stuck $Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+# Plot survcurv
+Surv_included <- 
+  ggplot(subset(Survival_table_2,Survival_table_2 > 0), aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle("Line 897 - Lifespan")+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+   theme_linedraw()
+  
+Surv_included
+```
+
+## Line 287
+
+This line didn't have as many flies stuck to the food from the get-go, but did have an uptick as deaths increase, unsurprisingly.
+
+```{r line 287 plot prep, echo=F, hide=T, warning=F}
+
+data_287 <- read.csv(files[1])
+
+expand_censor <- function(x){
+data<-
+  pivot_longer(x,
+    cols = contains("ale"), 
+    names_to = "Group",
+    values_to = "Freq")
+
+data_long <-
+  data[rep(row.names(data), data$Freq), 1:5]
+
+data_censor <-
+  data_long %>% 
+  separate(5, c("Sex", "Event")) %>% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %>% 
+  mutate(Group = ifelse(Event == 0, paste("censor"),
+                        ifelse(Event == 1, paste("death"),
+                               paste("stuck")))) %>% 
+  mutate(Event = recode(Event, 
+                      '0' = 0,
+                      '1' = 1,
+                      '2' = 0))
+return(data_censor)
+}
+
+expand_included <- function(x){
+  data<-
+  pivot_longer(x,
+    cols = contains("ale"), 
+    names_to = "Group",
+    values_to = "Freq")
+  
+data_long <-
+  data[rep(row.names(data), data$Freq), 1:5]
+
+data_included<-
+  data_long %>% 
+  separate(5, c("Sex", "Event")) %>% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %>% 
+  mutate(Group = ifelse(Event == 0, paste("censor"),
+                        ifelse(Event == 1, paste("death"),
+                               paste("stuck")))) %>% 
+  mutate(Event = recode(Event, 
+                      '0' = 0,
+                      '1' = 1,
+                      '2' = 1))
+ return(data_included)
+}
+
+censor_287 <- expand_censor(data_287)
+include_287 <- expand_included(data_287)
+```
+
+
+```{r quick plot 287 survcurv, fig.cap="Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
+
+surv_object_2 <- Surv(censor_287$Age, censor_287$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, censor_287)
+
+time_check = sort(unique(censor_287$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+stuck <-
+  censor_287 %>% 
+  filter(Group == "stuck") %>% 
+  mutate(Group = recode(Group, 'stuck' = 1)) %>% 
+  group_by(Age, Sex) %>% 
+  dplyr::summarise(Stuck= n()) %>% 
+  ungroup() %>% 
+  mutate(Time = Age,
+         Age = NULL)
+
+dual_data_287<-
+  merge(Survival_table_2, stuck, by=c("Time", "Sex"), all = T)
+# Plot survcurv
+dual_axes_287<-
+  ggplot(dual_data_287, aes(x=Time))+
+  geom_bar(aes(y=Stuck/40, fill = as.factor(Sex)), alpha = 0.4,
+           stat = "identity", size=1)+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+  scale_fill_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("#FF6666", "#333399"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1.1),
+                      breaks=c(seq(0,1.1,by=0.1)),
+                      sec.axis = sec_axis(~.*coeff, name = "Number of flies stuck to food"))+
+   theme_linedraw()
+  
+dual_axes_287
+```
+
+
+```{r line 287 included, fig.cap="Surv curv of Line 287 with food-stuck included as deaths"}
+surv_object_2 <- Surv(include_287$Age, include_287$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, include_287)
+
+time_check = sort(unique(include_287$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+# Plot survcurv
+Surv_included <- 
+  ggplot(subset(Survival_table_2,Survival_table_2 > 0), aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle("Line 287 - Lifespan (including stuck)")+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+   theme_linedraw()
+  
+Surv_included
+```
+
+

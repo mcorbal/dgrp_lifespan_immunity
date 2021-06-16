@@ -10,4 +10,6 @@ editor_options:
 
 This website contains the code used to analyze survival data from 12 DGRP lines following challenge with *Provedencia rettgeri* at 10 and 35 days old. 
 
-Check out this [link](survival.html) to see results so far.
+Check out this [link](survival.html) to see survival results so far.
+
+This [link](lifespan.html) brings you to the lifespan results.

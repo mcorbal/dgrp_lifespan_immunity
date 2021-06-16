@@ -188,7 +188,7 @@ y_labs
 ```
 
 
-```{r n number}
+```{r n number, warning=FALSE}
 # use survobject to get n number and subsequent dataframe  
 
 data_grouped <-
@@ -215,7 +215,7 @@ n.df <-
 
 ```
 
-```{r survplot all, echo=F, fig.cap="Survival Plots for all Lines, suffixed with block number"}
+```{r survplot all, warning=F, echo=F, fig.cap="Survival Plots for all Lines, suffixed with block number"}
 # FOR PLOTTING
 # Create 'condition' grouping variable 
 data_grouped <-
@@ -249,16 +249,15 @@ Grouped_surv$Line_Block <-
    facet_wrap(~Line_Block)+
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = c("Female 10 do", "Female 35 do", "Male 10  do", "Male 35 do"),
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=c("Female 10 do", "Female 35 do", "Male 10  do", "Male 35 do"))+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -279,7 +278,7 @@ survplot_all
  
 ```
 
-```{r coxph analysis, fig.cap="Corresponding regression coefficients"}
+```{r coxph analysis, warning=F, fig.cap="Corresponding regression coefficients"}
 
 
 data_tidy$Age_at_infection <- as.factor(data_tidy$Age_at_infection)
@@ -314,7 +313,7 @@ coxph_ouput$Line_Block <-
    
 test <- 
    ggplot(coxph_ouput, aes(x = Term, y=beta, colour = Term))+
-   scale_colour_viridis(discrete = T, option = "viridis")+
+   scale_colour_manual(values = c("red","blue","purple"))+
    facet_wrap(~Line_Block)+
    geom_point()+
    geom_errorbar(aes(ymin = beta-se, ymax = beta+se))+
@@ -336,7 +335,7 @@ test
 
 ## Individual Survival Curves
 
-```{r survplot individual, echo =F}
+```{r survplot individual, warning = F, echo =F}
 
 data_grouped <-
   data_tidy %>% 
@@ -365,16 +364,15 @@ Line21 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 21")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line21labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red", "blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line21labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -392,23 +390,22 @@ Line21 <-
          col=guide_legend(ncol=1))
 Line21
 
-#line 21 labels
+#line 109 labels
 Line109labs <- paste_n(109)
 Line109 <-
   ggplot(subset(individ_ready, Line == "109"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 109")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line109labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line109labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -433,16 +430,15 @@ Line287 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 287")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line287labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line287labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -468,16 +464,15 @@ Line304 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 304")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line304labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line304labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -502,16 +497,15 @@ Line386 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 386")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line386labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line386labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -536,16 +530,15 @@ Line517 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 517")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line517labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line517labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -570,16 +563,15 @@ Line59 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 59")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line59labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line59labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -604,49 +596,15 @@ Line730 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 730")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line730labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line730labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
-   scale_y_continuous("Proportion of survivors",
-                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
-   labs(colour = "Group", linetype = "Group")+
-   theme_bw()+
-   theme(strip.text.x = element_text(size=10),
-         legend.direction = "vertical", 
-         legend.box = "horizontal",
-         legend.title = element_text(face="italic",size=Largefont), 
-         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
-         legend.text = element_text(size=Mediumfont),
-         legend.background = element_rect(fill=NA),
-         plot.margin = unit(c(0,0,1.2,0), "cm"))+
-   guides(shape=guide_legend(ncol=1),
-         fill=guide_legend(ncol=1),
-         col=guide_legend(ncol=1))
-Line730
-
-Line730labs <- paste_n(730)
-Line730 <-
-  ggplot(subset(individ_ready, Line == "730"), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
-   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
-   geom_point(size = 0.7)+
-  ggtitle("Line 730")+
-   scale_color_viridis(name="Group",
-                     labels = Line730labs,
-                     option = "viridis",
-                     discrete = T)+
-   scale_linetype_manual(name="Group",
-                        values=c("solid","dashed", "solid","dashed"),
-                        labels=Line730labs)+
-   scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -671,16 +629,15 @@ Line732 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 732")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line732labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line732labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -705,16 +662,15 @@ Line897 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 897")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line897labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line897labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -739,16 +695,15 @@ Line907 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 907")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line907labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line907labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -790,16 +745,15 @@ Line821b1 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 821 block 1")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line821b1labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line821b1labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -824,16 +778,15 @@ Line821b2 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 821 block 2")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line821b2labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line821b2labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -858,16 +811,15 @@ Line821b3 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 821 block 3")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line821b3labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line821b3labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
@@ -892,16 +844,15 @@ Line821b4 <-
    geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
    geom_point(size = 0.7)+
   ggtitle("Line 821 block 4")+
-   scale_color_viridis(name="Group",
+   scale_color_manual(name="Group",
                      labels = Line821b4labs,
-                     option = "viridis",
-                     discrete = T)+
+                     values = c("red","red","blue","blue"))+
    scale_linetype_manual(name="Group",
                         values=c("solid","dashed", "solid","dashed"),
                         labels=Line821b4labs)+
    scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 124),
-                     breaks=c(seq(0,124,by=24)))+
+                     limits=c(0, 36),
+                     breaks=c(seq(0,36,by=2)))+
    scale_y_continuous("Proportion of survivors",
                      limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
    labs(colour = "Group", linetype = "Group")+
