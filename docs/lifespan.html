@@ -9,11 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Mary-Kate Corbally" />
+<meta name="author" content="mcorbal" />
 
-<meta name="date" content="2021-06-08" />
+<meta name="date" content="2021-06-14" />
 
-<title>Survival - plots and statistical analysis</title>
+<title>lifespan</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -398,10 +398,9 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Survival - plots and statistical analysis</h1>
-<h3 class="subtitle">Comparative survival to <em>P. rettgeri</em> challenge of young and old flies</h3>
-<h4 class="author">Mary-Kate Corbally</h4>
-<h4 class="date">2021-06-08</h4>
+<h1 class="title toc-ignore">lifespan</h1>
+<h4 class="author">mcorbal</h4>
+<h4 class="date">2021-06-14</h4>
 
 </div>
 
@@ -564,7 +563,7 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/survival.Rmd</code>) and HTML (<code>docs/survival.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/lifespan.Rmd</code>) and HTML (<code>docs/lifespan.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -593,7 +592,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/c0cc00396396570a897990731438c981bc311afd/analysis/survival.Rmd" target="_blank">c0cc003</a>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/c0cc00396396570a897990731438c981bc311afd/analysis/lifespan.Rmd" target="_blank">c0cc003</a>
 </td>
 <td>
 mcorbal
@@ -605,74 +604,6 @@ mcorbal
 Change colour scheme + x-axis and initial lifespan files
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mcorbal/dgrp_lifespan_immunity/51c50e180c7d55cbb4589a8a1bf5ae9a5320fddb/docs/survival.html" target="_blank">51c50e1</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/75923c1f5903eff1ed7bd583c5e5963decffb4a9/analysis/survival.Rmd" target="_blank">75923c1</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-<td>
-Dose description in survivAL files
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mcorbal/dgrp_lifespan_immunity/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/survival.html" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/99be2efeb5eb3f5658e88f5122343395bbf52283/analysis/survival.Rmd" target="_blank">99be2ef</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-<td>
-Publish initial Survival file
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -680,7 +611,10 @@ Publish initial Survival file
 </div>
 </div>
 </div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
 <p>This document was created in R Markdown and translated into html using the R package ‘R knitr’. To unveil or hide code behind graphical and tabular outputs, toggle the <strong>Code</strong> buttons.</p>
+</div>
 <div id="load-libraries-datastes-and-then-tidy" class="section level2">
 <h2>Load Libraries, datastes and then tidy</h2>
 <pre class="r"><code>library(survival) # survival functions
@@ -710,7 +644,7 @@ Surv = survival::Surv
 survfit = survival::survfit
 coxme = coxme::coxme
 
-# Font
+
 SuperSmallfont= 6
 Smallfont= 10
 Mediumfont= 12
@@ -726,72 +660,39 @@ fontsizeaxes2 = 10
 
 
 # DATA import
-## 8 representing each of 4 block per time point.
+## 12 representing each of line of each block (821 repeated 4x)
 data_path = &quot;data&quot;
-files &lt;- list.files(path = data_path, pattern = &quot;^S.*\\.csv$&quot;, full.names = T)
+files &lt;- list.files(path = data_path, pattern = &quot;^L.*\\.csv$&quot;, full.names = T)
 files
 
 ## Use &#39;R ldply&#39; to apply read.csv function to all elements and add to dataframe 
-data_all &lt;- ldply(files, read_csv)
+data_897&lt;- read_csv(files[2])
 
-# DATA tidy
-## Select non-empty columns and modify variable classes
+
+data&lt;-
+  pivot_longer(data_897,
+    cols = contains(&quot;ale&quot;), 
+    names_to = &quot;Group&quot;,
+    values_to = &quot;Freq&quot;
+  )
+
+data_long &lt;-
+  data[rep(row.names(data), data$Freq), 1:5]
+
 data_tidy &lt;-
-  data_all %&gt;% 
-  select(1:21) %&gt;% 
-  mutate(across(where(is.character), as.factor)) %&gt;% 
-  mutate(across(Line, as.factor))</code></pre>
-</div>
-<div id="variation-in-initial-dose-throughout-experiment" class="section level2">
-<h2>Variation in initial dose throughout experiment</h2>
-<p>Last two infection dates correspond to the day 35, Block 3 and 4 infections, which corresponds to the top two rows of the survival curves in the next section.</p>
-<p>I’m at a loss as to why this is the case and why the spread is so huge. LB agar was made up the same as always with same amount of erythromycin added. Bacterial culture was inverted plenty of times before filling the needle…</p>
-<div class="figure" style="text-align: center">
-<img src="figure/survival.Rmd/time0%20dose-1.png" alt="Initial dose variation over course of experiment" width="672" />
-<p class="caption">
-Initial dose variation over course of experiment
-</p>
-</div>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-time0-dose-1">
-Past versions of “time0 dose-1.png”
-</button>
-</p>
-<div id="fig-no-spaces-time0-dose-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/time0 dose-1.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="perform-coxme-and-plot-survival-curves" class="section level2">
-<h2>Perform CoxME and plot survival curves</h2>
+  data_long %&gt;% 
+  separate(5, c(&quot;Sex&quot;, &quot;Event&quot;)) %&gt;% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %&gt;% 
+  mutate(Group = ifelse(Event == 0, paste(&quot;censor&quot;),
+                        ifelse(Event == 1, paste(&quot;death&quot;),
+                               paste(&quot;stuck&quot;)))) %&gt;% 
+  mutate(Event = recode(Event, 
+                      &#39;0&#39; = 0,
+                      &#39;1&#39; = 1,
+                      &#39;2&#39; = 0))</code></pre>
 <pre class="r"><code># Function to extract CoxME table
 
  extract_coxme_table &lt;- function (mod){
@@ -858,737 +759,185 @@ y_labs &lt;- c(paste(new$id[1]),
       paste(new$id[4]))
 y_labs
 }</code></pre>
-<pre class="r"><code># use survobject to get n number and subsequent dataframe  
+</div>
+<div id="deciding-how-to-handle-flies-stuck-to-food" class="section level2">
+<h2>Deciding how to handle Flies stuck to food</h2>
+<p>Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, were suck to the food from quite early on. While it seems a lot of flies do travel to food to die, these flies while young were very much alive but just stuck.</p>
+<p>Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis. This helps visualise how much this line was susceptible to getting stuck.</p>
+<pre class="r"><code>surv_object &lt;- Surv(data_tidy$Age, data_tidy$Event)
+fit &lt;- survfit(surv_object ~ Sex, data_tidy)
 
-data_grouped &lt;-
+time_check = sort(unique(data_tidy$Age))
+Survival_table &lt;- ggplotprep2(fit, times = c(0,time_check))
+Survival_table$Sex &lt;- Survival_table$Condition
+Survival_table$Condition &lt;- NULL
+
+# Extract &#39;stuck&#39; rows and count for addition to survival table 
+stuck &lt;-
   data_tidy %&gt;% 
-  unite(&quot;line_sex_age&quot;, c(4,7,9), sep = &quot;_&quot;, remove = F) %&gt;% 
-  mutate(across(line_sex_age, as.factor))
-
-surv_group &lt;- survfit(Surv(time= Time_of_death, event = Censor)
-                    ~ line_sex_age, data = data_grouped)
-
-# Create df with n numbers via line_sex_age
-conditions &lt;- as.vector(levels(data_grouped$line_sex_age))
-n.number &lt;- as.vector(surv_group[[&quot;n&quot;]])
-df &lt;- data.frame(conditions, n.number)
-
-n.df &lt;- 
-  df %&gt;% 
-  separate(1, c(&quot;Line&quot;, &quot;Sex&quot;, &quot;Age&quot;))
-
-
-
-# FOR PLOTTING
-# Create grouping variable </code></pre>
-<div class="figure" style="text-align: center">
-<img src="figure/survival.Rmd/survplot%20all-1.png" alt="Survival Plots for all Lines, suffixed with block number" width="672" />
-<p class="caption">
-Survival Plots for all Lines, suffixed with block number
-</p>
-</div>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-all-1">
-Past versions of “survplot all-1.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-all-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot all-1.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>data_tidy$Age_at_infection &lt;- as.factor(data_tidy$Age_at_infection)
-
-coxph&lt;-
-  data_tidy%&gt;%
-   unite(&quot;Line_Block&quot;, c(4,8), sep = &quot;_&quot;, remove = F) %&gt;% #grouping variable to handle block control
-  group_by(Line_Block)%&gt;% 
-  nest() %&gt;% 
-  dplyr::mutate(cox_object = map(data, 
-                                 ~coxph(Surv(time = Time_to_death, event = Censor) ~
-                                                 Sex + Age_at_infection +Sex*Age_at_infection, data=.x))) %&gt;% 
-  dplyr::mutate(cox_tidy = map(cox_object, extract_coxme_table)) %&gt;% 
+  filter(Group == &quot;stuck&quot;) %&gt;% 
+  mutate(Group = recode(Group, &#39;stuck&#39; = 1)) %&gt;% 
+  group_by(Age, Sex) %&gt;% 
+  dplyr::summarise(Stuck= n()) %&gt;% 
   ungroup() %&gt;% 
-  transmute(Line_Block, cox_tidy) %&gt;% 
-  unnest(cox_tidy)
-
-# convert Line_Block to factor
-coxph$Line_Block &lt;- as.factor(as.character(coxph$Line_Block))
-
-coxph_ouput &lt;-
-   coxph %&gt;% 
-   mutate(across(where(is.character), as.numeric))
-
-coxph_ouput$Term &lt;- rep(c(&quot;Sex&quot;, &quot;Age&quot;, &quot;Sex*Age&quot;), each=1, length.out = 45)
-coxph_ouput$HR &lt;- exp(coxph_ouput$beta)
-coxph_ouput$Line_Block &lt;- 
-  factor(coxph_ouput$Line_Block , levels = c(&quot;821_4&quot;, &quot;386_4&quot;, &quot;730_4&quot;, &quot;732_4&quot;,&quot;821_3&quot;, 
-                                             &quot;517_3&quot;, &quot;907_3&quot;, &quot;59_3&quot;, &quot;821_1&quot;, &quot;109_1&quot;, 
-                                             &quot;287_1&quot;, &quot;304_1&quot;, &quot;821_2&quot;, &quot;21_2&quot;, &quot;897_2&quot;))
-
-   
-test &lt;- 
-   ggplot(coxph_ouput, aes(x = Term, y=beta, colour = Term))+
-   scale_colour_manual(values = c(&quot;red&quot;,&quot;blue&quot;,&quot;purple&quot;))+
-   facet_wrap(~Line_Block)+
-   geom_point()+
-   geom_errorbar(aes(ymin = beta-se, ymax = beta+se))+
-   theme_linedraw()+
-   theme(strip.text.x = element_text(size=10),
-         legend.direction = &quot;vertical&quot;, 
-         legend.box = &quot;horizontal&quot;,
-         legend.title = element_text(face=&quot;italic&quot;,size=Largefont), 
-         legend.key = element_rect(colour = &#39;white&#39;, fill = &quot;white&quot;, linetype=&#39;dashed&#39;),
-         legend.text = element_text(size=Mediumfont),
-         legend.background = element_rect(fill=NA),
-         plot.margin = unit(c(0,0,1.2,0), &quot;cm&quot;))+
-   guides(shape=guide_legend(ncol=1),
-         fill=guide_legend(ncol=1),
-         col=guide_legend(ncol=1))
-   
-test</code></pre>
+  mutate(Time = Age,
+         Age = NULL)</code></pre>
+<pre><code>`summarise()` has grouped output by &#39;Age&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>dual_data&lt;-
+  merge(Survival_table, stuck, by=c(&quot;Time&quot;, &quot;Sex&quot;), all = T)
+  
+coeff &lt;- 40
+# Plot a dual_axis figure with df where flies in food have been censored 
+dual_axes &lt;- 
+  ggplot(dual_data, aes(x=Time))+
+  geom_bar(aes(y=Stuck/40, fill = as.factor(Sex)), alpha = 0.4,
+           stat = &quot;identity&quot;, size=1)+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  scale_color_manual(name=&quot;Group&quot;,
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
+  scale_fill_manual(name=&quot;Group&quot;,
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     values = c(&quot;#FF6666&quot;, &quot;#333399&quot;))+
+   scale_y_continuous(&quot;Proportion of survivors&quot;,
+                      limits = c(0,1.1),
+                      breaks=c(seq(0,1.1,by=0.1)),
+                      sec.axis = sec_axis(~.*coeff, name = &quot;Number of flies stuck to food&quot;))+
+   theme_linedraw()
+  
+dual_axes</code></pre>
+<pre><code>Warning: Removed 15 rows containing missing values (position_stack).</code></pre>
+<pre><code>Warning: Removed 1 rows containing missing values (geom_bar).</code></pre>
 <div class="figure" style="text-align: center">
-<img src="figure/survival.Rmd/coxph%20analysis-1.png" alt="Corresponding regression coefficients" width="672" />
+<img src="figure/lifespan.Rmd/quick%20plot%20survcurv-1.png" alt="Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis" width="672" />
 <p class="caption">
-Corresponding regression coefficients
+Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis
 </p>
 </div>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-coxph-analysis-1">
-Past versions of “coxph analysis-1.png”
-</button>
+<p>If I include the flies on the food in the lifespan as deaths, the survival curve looks very different with females having a much lower median lifespan.</p>
+<pre class="r"><code>data_include_stuck &lt;-
+  data_long %&gt;% 
+  separate(5, c(&quot;Sex&quot;, &quot;Event&quot;)) %&gt;% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %&gt;% 
+  mutate(Group = ifelse(Event == 0, paste(&quot;censor&quot;),
+                        ifelse(Event == 1, paste(&quot;death&quot;),
+                               paste(&quot;stuck&quot;)))) %&gt;% 
+  mutate(Event = recode(Event, 
+                      &#39;0&#39; = 0,
+                      &#39;1&#39; = 1,
+                      &#39;2&#39; = 1))
+
+surv_object_2 &lt;- Surv(data_include_stuck $Age, data_include_stuck $Event)
+fit_2 &lt;- survfit(surv_object_2 ~ Sex, data_include_stuck )
+
+time_check = sort(unique(data_include_stuck $Age))
+Survival_table_2 &lt;- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex &lt;- Survival_table_2$Condition
+Survival_table_2$Condition &lt;- NULL
+
+# Plot survcurv
+Surv_included &lt;- 
+  ggplot(subset(Survival_table_2,Survival_table_2 &gt; 0), aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle(&quot;Line 897 - Lifespan&quot;)+
+  scale_color_manual(name=&quot;Group&quot;,
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
+   scale_y_continuous(&quot;Proportion of survivors&quot;,
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+   theme_linedraw()
+  
+Surv_included</code></pre>
+<pre><code>Warning: Removed 255 row(s) containing missing values (geom_path).</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/lifespan.Rmd/897%20food-stuck%20included-1.png" alt="Surv curv of Line 897 with food-stuck included as deaths" width="672" />
+<p class="caption">
+Surv curv of Line 897 with food-stuck included as deaths
 </p>
-<div id="fig-no-spaces-coxph-analysis-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/coxph analysis-1.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
-</div>
-<div id="individual-survival-curves" class="section level2">
-<h2>Individual Survival Curves</h2>
-<p><img src="figure/survival.Rmd/survplot%20individual-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-1">
-Past versions of “survplot individual-1.png”
-</button>
+<div id="line-287" class="section level2">
+<h2>Line 287</h2>
+<p>This line didn’t have as many flies stuck to the food from the get-go, but did have an uptick as deaths increase, unsurprisingly.</p>
+<pre class="r"><code>surv_object_2 &lt;- Surv(censor_287$Age, censor_287$Event)
+fit_2 &lt;- survfit(surv_object_2 ~ Sex, censor_287)
+
+time_check = sort(unique(censor_287$Age))
+Survival_table_2 &lt;- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex &lt;- Survival_table_2$Condition
+Survival_table_2$Condition &lt;- NULL
+
+stuck &lt;-
+  censor_287 %&gt;% 
+  filter(Group == &quot;stuck&quot;) %&gt;% 
+  mutate(Group = recode(Group, &#39;stuck&#39; = 1)) %&gt;% 
+  group_by(Age, Sex) %&gt;% 
+  dplyr::summarise(Stuck= n()) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(Time = Age,
+         Age = NULL)</code></pre>
+<pre><code>`summarise()` has grouped output by &#39;Age&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>dual_data_287&lt;-
+  merge(Survival_table_2, stuck, by=c(&quot;Time&quot;, &quot;Sex&quot;), all = T)
+# Plot survcurv
+dual_axes_287&lt;-
+  ggplot(dual_data_287, aes(x=Time))+
+  geom_bar(aes(y=Stuck/40, fill = as.factor(Sex)), alpha = 0.4,
+           stat = &quot;identity&quot;, size=1)+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  scale_color_manual(name=&quot;Group&quot;,
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
+  scale_fill_manual(name=&quot;Group&quot;,
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     values = c(&quot;#FF6666&quot;, &quot;#333399&quot;))+
+   scale_y_continuous(&quot;Proportion of survivors&quot;,
+                      limits = c(0,1.1),
+                      breaks=c(seq(0,1.1,by=0.1)),
+                      sec.axis = sec_axis(~.*coeff, name = &quot;Number of flies stuck to food&quot;))+
+   theme_linedraw()
+  
+dual_axes_287</code></pre>
+<pre><code>Warning: Removed 18 rows containing missing values (position_stack).</code></pre>
+<pre><code>Warning: Removed 4 rows containing missing values (geom_bar).</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/lifespan.Rmd/quick%20plot%20287%20survcurv-1.png" alt="Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis" width="672" />
+<p class="caption">
+Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis
 </p>
-<div id="fig-no-spaces-survplot-individual-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-1.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
 </div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-2.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-2">
-Past versions of “survplot individual-2.png”
-</button>
+<pre class="r"><code>surv_object_2 &lt;- Surv(include_287$Age, include_287$Event)
+fit_2 &lt;- survfit(surv_object_2 ~ Sex, include_287)
+
+time_check = sort(unique(include_287$Age))
+Survival_table_2 &lt;- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex &lt;- Survival_table_2$Condition
+Survival_table_2$Condition &lt;- NULL
+
+# Plot survcurv
+Surv_included &lt;- 
+  ggplot(subset(Survival_table_2,Survival_table_2 &gt; 0), aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle(&quot;Line 287 - Lifespan (including stuck)&quot;)+
+  scale_color_manual(name=&quot;Group&quot;,
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
+   scale_y_continuous(&quot;Proportion of survivors&quot;,
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+   theme_linedraw()
+  
+Surv_included</code></pre>
+<pre><code>Warning: Removed 295 row(s) containing missing values (geom_path).</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/lifespan.Rmd/line%20287%20included-1.png" alt="Surv curv of Line 287 with food-stuck included as deaths" width="672" />
+<p class="caption">
+Surv curv of Line 287 with food-stuck included as deaths
 </p>
-<div id="fig-no-spaces-survplot-individual-2" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-2.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-3.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-3">
-Past versions of “survplot individual-3.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-3" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-3.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-4.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-4">
-Past versions of “survplot individual-4.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-4" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-4.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-5.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-5">
-Past versions of “survplot individual-5.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-5" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-5.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-6.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-6">
-Past versions of “survplot individual-6.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-6" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-6.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-7.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-7">
-Past versions of “survplot individual-7.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-7" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-7.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-8.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-8">
-Past versions of “survplot individual-8.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-8" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-8.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-9.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-9">
-Past versions of “survplot individual-9.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-9" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-9.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-10.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-10">
-Past versions of “survplot individual-10.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-10" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-10.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-11.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-11">
-Past versions of “survplot individual-11.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-11" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-11.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-12.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-12">
-Past versions of “survplot individual-12.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-12" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-12.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-13.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-13">
-Past versions of “survplot individual-13.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-13" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-13.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-14.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-14">
-Past versions of “survplot individual-14.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-14" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-14.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/survival.Rmd/survplot%20individual-15.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-survplot-individual-15">
-Past versions of “survplot individual-15.png”
-</button>
-</p>
-<div id="fig-no-spaces-survplot-individual-15" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/00b6b8d23b0ed6d2b825006e28b3b844fe48a5e8/docs/figure/survival.Rmd/survplot individual-15.png" target="_blank">00b6b8d</a>
-</td>
-<td>
-mcorbal
-</td>
-<td>
-2021-06-14
-</td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 <br>
 <p>
