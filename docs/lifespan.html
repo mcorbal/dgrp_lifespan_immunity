@@ -516,16 +516,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytreec0cc00396396570a897990731438c981bc311afdtargetblankc0cc003a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/c0cc00396396570a897990731438c981bc311afd" target="_blank">c0cc003</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytree832c15bb381875758635f8da845f122dca9b7b41targetblank832c15ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/832c15bb381875758635f8da845f122dca9b7b41" target="_blank">832c15b</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytreec0cc00396396570a897990731438c981bc311afdtargetblankc0cc003a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytree832c15bb381875758635f8da845f122dca9b7b41targetblank832c15ba" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/c0cc00396396570a897990731438c981bc311afd" target="_blank">c0cc003</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/832c15bb381875758635f8da845f122dca9b7b41" target="_blank">832c15b</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -587,6 +587,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/832c15bb381875758635f8da845f122dca9b7b41/analysis/lifespan.Rmd" target="_blank">832c15b</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-16
+</td>
+<td>
+update n numbers on lifespan
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mcorbal/dgrp_lifespan_immunity/bd3100fa81d1a4eff2a4ece04c2843b8412031d7/docs/lifespan.html" target="_blank">bd3100f</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -760,10 +794,10 @@ y_labs &lt;- c(paste(new$id[1]),
 y_labs
 }</code></pre>
 </div>
-<div id="deciding-how-to-handle-flies-stuck-to-food" class="section level2">
-<h2>Deciding how to handle Flies stuck to food</h2>
-<p>Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, were suck to the food from quite early on. While it seems a lot of flies do travel to food to die, these flies while young were very much alive but just stuck.</p>
-<p>Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis. This helps visualise how much this line was susceptible to getting stuck.</p>
+<div id="deciding-how-to-handle-flies-stuck-to-food---line-897" class="section level2">
+<h2>Deciding how to handle Flies stuck to food - Line 897</h2>
+<p>Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, got stuck to the food from quite early on.</p>
+<p>Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis, just to visualise the susceptibility of this line.</p>
 <pre class="r"><code>surv_object &lt;- Surv(data_tidy$Age, data_tidy$Event)
 fit &lt;- survfit(surv_object ~ Sex, data_tidy)
 
@@ -781,9 +815,9 @@ stuck &lt;-
   dplyr::summarise(Stuck= n()) %&gt;% 
   ungroup() %&gt;% 
   mutate(Time = Age,
-         Age = NULL)</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;Age&#39;. You can override using the `.groups` argument.</code></pre>
-<pre class="r"><code>dual_data&lt;-
+         Age = NULL)
+
+dual_data&lt;-
   merge(Survival_table, stuck, by=c(&quot;Time&quot;, &quot;Sex&quot;), all = T)
   
 coeff &lt;- 40
@@ -794,10 +828,10 @@ dual_axes &lt;-
            stat = &quot;identity&quot;, size=1)+
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   scale_color_manual(name=&quot;Group&quot;,
-                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     labels = c(&quot;Female (835)&quot;, &quot;Male (935)&quot;),
                      values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
   scale_fill_manual(name=&quot;Group&quot;,
-                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     labels = c(&quot;Female (835)&quot;, &quot;Male (935)&quot;),
                      values = c(&quot;#FF6666&quot;, &quot;#333399&quot;))+
    scale_y_continuous(&quot;Proportion of survivors&quot;,
                       limits = c(0,1.1),
@@ -806,13 +840,48 @@ dual_axes &lt;-
    theme_linedraw()
   
 dual_axes</code></pre>
-<pre><code>Warning: Removed 15 rows containing missing values (position_stack).</code></pre>
-<pre><code>Warning: Removed 1 rows containing missing values (geom_bar).</code></pre>
 <div class="figure" style="text-align: center">
 <img src="figure/lifespan.Rmd/quick%20plot%20survcurv-1.png" alt="Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis" width="672" />
 <p class="caption">
 Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-quick-plot-survcurv-1">
+Past versions of “quick plot survcurv-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-quick-plot-survcurv-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/bd3100fa81d1a4eff2a4ece04c2843b8412031d7/docs/figure/lifespan.Rmd/quick plot survcurv-1.png" target="_blank">bd3100f</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>If I include the flies on the food in the lifespan as deaths, the survival curve looks very different with females having a much lower median lifespan.</p>
 <pre class="r"><code>data_include_stuck &lt;-
@@ -844,7 +913,7 @@ Surv_included &lt;-
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   ggtitle(&quot;Line 897 - Lifespan&quot;)+
   scale_color_manual(name=&quot;Group&quot;,
-                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     labels = c(&quot;Female (835)&quot;, &quot;Male (935)&quot;),
                      values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
    scale_y_continuous(&quot;Proportion of survivors&quot;,
                       limits = c(0,1),
@@ -852,12 +921,48 @@ Surv_included &lt;-
    theme_linedraw()
   
 Surv_included</code></pre>
-<pre><code>Warning: Removed 255 row(s) containing missing values (geom_path).</code></pre>
 <div class="figure" style="text-align: center">
 <img src="figure/lifespan.Rmd/897%20food-stuck%20included-1.png" alt="Surv curv of Line 897 with food-stuck included as deaths" width="672" />
 <p class="caption">
 Surv curv of Line 897 with food-stuck included as deaths
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-897-food-stuck-included-1">
+Past versions of “897 food-stuck included-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-897-food-stuck-included-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/bd3100fa81d1a4eff2a4ece04c2843b8412031d7/docs/figure/lifespan.Rmd/897 food-stuck included-1.png" target="_blank">bd3100f</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 <div id="line-287" class="section level2">
@@ -865,6 +970,9 @@ Surv curv of Line 897 with food-stuck included as deaths
 <p>This line didn’t have as many flies stuck to the food from the get-go, but did have an uptick as deaths increase, unsurprisingly.</p>
 <pre class="r"><code>surv_object_2 &lt;- Surv(censor_287$Age, censor_287$Event)
 fit_2 &lt;- survfit(surv_object_2 ~ Sex, censor_287)
+
+female_287n &lt;- as.character(fit_2[[&quot;n&quot;]][1])
+male_287n &lt;- as.character(fit_2[[&quot;n&quot;]][2])
 
 time_check = sort(unique(censor_287$Age))
 Survival_table_2 &lt;- ggplotprep2(fit_2, times = c(0,time_check))
@@ -890,10 +998,10 @@ dual_axes_287&lt;-
            stat = &quot;identity&quot;, size=1)+
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   scale_color_manual(name=&quot;Group&quot;,
-                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     labels = c(&quot;Female (1031)&quot;, &quot;Male (868)&quot;),
                      values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
   scale_fill_manual(name=&quot;Group&quot;,
-                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     labels = c(&quot;Female (1031)&quot;, &quot;Male (868)&quot;),
                      values = c(&quot;#FF6666&quot;, &quot;#333399&quot;))+
    scale_y_continuous(&quot;Proportion of survivors&quot;,
                       limits = c(0,1.1),
@@ -902,13 +1010,48 @@ dual_axes_287&lt;-
    theme_linedraw()
   
 dual_axes_287</code></pre>
-<pre><code>Warning: Removed 18 rows containing missing values (position_stack).</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (geom_bar).</code></pre>
 <div class="figure" style="text-align: center">
 <img src="figure/lifespan.Rmd/quick%20plot%20287%20survcurv-1.png" alt="Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis" width="672" />
 <p class="caption">
 Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-quick-plot-287-survcurv-1">
+Past versions of “quick plot 287 survcurv-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-quick-plot-287-survcurv-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/bd3100fa81d1a4eff2a4ece04c2843b8412031d7/docs/figure/lifespan.Rmd/quick plot 287 survcurv-1.png" target="_blank">bd3100f</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <pre class="r"><code>surv_object_2 &lt;- Surv(include_287$Age, include_287$Event)
 fit_2 &lt;- survfit(surv_object_2 ~ Sex, include_287)
@@ -924,7 +1067,7 @@ Surv_included &lt;-
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
   ggtitle(&quot;Line 287 - Lifespan (including stuck)&quot;)+
   scale_color_manual(name=&quot;Group&quot;,
-                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     labels = c(&quot;Female (1031)&quot;, &quot;Male (868)&quot;),
                      values = c(&quot;firebrick&quot;, &quot;navy&quot;))+
    scale_y_continuous(&quot;Proportion of survivors&quot;,
                       limits = c(0,1),
@@ -938,6 +1081,43 @@ Surv_included</code></pre>
 <p class="caption">
 Surv curv of Line 287 with food-stuck included as deaths
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-line-287-included-1">
+Past versions of “line 287 included-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-line-287-included-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/bd3100fa81d1a4eff2a4ece04c2843b8412031d7/docs/figure/lifespan.Rmd/line 287 included-1.png" target="_blank">bd3100f</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-06-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <br>
 <p>
