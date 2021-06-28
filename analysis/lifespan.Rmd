@@ -627,7 +627,7 @@ Surv_included <-
   geom_line(aes(y=Survival,colour=as.factor(Sex)),show.legend = F, size = 1.5)+
   ggtitle("Line 109 (all as deaths)")+
   scale_color_manual(name="Group",
-                     labels = c("Female (1031)", "Male (868)"),
+                     labels = c("Female (865)", "Male (851)"),
                      values = c("firebrick", "navy"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1),
