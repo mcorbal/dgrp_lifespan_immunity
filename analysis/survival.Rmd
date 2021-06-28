@@ -38,6 +38,7 @@ library(ggpubr) # level-up plots
 library(purrr) # For mapping through list
 library(broom) # Extraction of mapped function calls into dataframes
 library(viridis) # colourblind colour palette 
+library(cowplot) # Grid plots + labels 
 
 select = dplyr::select
 mutate = dplyr::mutate
@@ -99,18 +100,16 @@ Dose_sum <-
       
 
 
-Dose_sum$Date_of_infection <- 
-  factor(Dose_sum$Date_of_infection, levels = c("10/04/2021", "16/04/2021", "22/04/2021", "28/04/2021",
+Dose_data$Date_of_infection <- 
+  factor(Dose_data$Date_of_infection, levels = c("10/04/2021", "16/04/2021", "22/04/2021", "28/04/2021",
                                                 "05/05/2021", "11/05/2021", "17/05/2021", "23/05/2021"))
-
-Initial_dose <-
-   ggplot(Dose_sum, aes(Date_of_infection, Mean)) +
-   geom_point(color = "red", size = 6)+
-   geom_errorbar(aes(ymin=Mean-sd, ymax =Mean+sd))+
+Initial_dose_2 <-
+   ggplot(Dose_data, aes(Date_of_infection, OD)) +
+   geom_boxplot(aes(fill = as.factor(Date_of_infection)))+
    scale_x_discrete("Date of Infection")+
    scale_y_continuous("Initial Dose (CFU/fly)")
    
-Initial_dose
+Initial_dose_2
 ```
 
 
@@ -333,7 +332,7 @@ test <-
 test
 ```
 
-## Individual Survival Curves
+## Individual Survival Curves 
 
 ```{r survplot individual, warning = F, echo =F}
 
@@ -872,6 +871,41 @@ Line821b4
 
 ```
 
+## Quick plot generation to compare lysing methods
+```{r}
 
+lyse <- read.csv("data/LyseCompare.csv")
+
+lyse_clean <- 
+   lyse %>% 
+   separate(1, c("Method", "Sample"))
+
+lyseComp <-
+   ggplot(lyse_clean, aes(Method,CFU_fly)) +
+   geom_boxplot(aes(fill = as.factor(Method)))+
+   scale_x_discrete("Method")+
+   theme(legend.position = "none")+
+   scale_y_continuous("Initial Dose (CFU/fly)")
+   
+lyseComp
+
+Dose_data$Date_of_infection <- 
+  factor(Dose_data$Date_of_infection, levels = c("10/04/2021", "16/04/2021", "22/04/2021", "28/04/2021",
+                                                "05/05/2021", "11/05/2021", "17/05/2021", "23/05/2021"))
+Initial_dose_2 <-
+   ggplot(Dose_data, aes(Date_of_infection, OD)) +
+   geom_boxplot(aes(fill = as.factor(Date_of_infection)))+
+   scale_x_discrete("Date of Infection")+
+   theme(legend.position = "none",
+         axis.text.x = element_text(angle = 45, hjust = 1))+
+   scale_y_continuous("Initial Dose (CFU/fly)")
+   
+Initial_dose_2
+
+p = plot_grid(lyseComp, Initial_dose_2, labels = "AUTO")
+p
+
+ggsave("output/dose_compare.pdf", p)
+```
 
 

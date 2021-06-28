@@ -39,6 +39,7 @@ library(ggpubr) # level-up plots
 library(purrr) # For mapping through list
 library(broom) # Extraction of mapped function calls into dataframes
 library(viridis) # colourblind colour palette 
+library(cowplot) # Grid plots
 
 select = dplyr::select
 mutate = dplyr::mutate
@@ -68,7 +69,7 @@ files <- list.files(path = data_path, pattern = "^L.*\\.csv$", full.names = T)
 files
 
 ## Use 'R ldply' to apply read.csv function to all elements and add to dataframe 
-data_897<- read_csv(files[2])
+data_897<- read_csv(files[3])
 
 
 data<-
@@ -166,15 +167,72 @@ y_labs <- c(paste(new$id[1]),
       paste(new$id[4]))
 y_labs
 }
+
+# Expanding lifespan datasets 
+expand_censor <- function(x){
+data<-
+  pivot_longer(x,
+    cols = contains("ale"), 
+    names_to = "Group",
+    values_to = "Freq")
+
+data_long <-
+  data[rep(row.names(data), data$Freq), 1:5]
+
+data_censor <-
+  data_long %>% 
+  separate(5, c("Sex", "Event")) %>% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %>% 
+  mutate(Group = ifelse(Event == 0, paste("censor"),
+                        ifelse(Event == 1, paste("death"),
+                               paste("stuck")))) %>% 
+  mutate(Event = recode(Event, 
+                      '0' = 0,
+                      '1' = 1,
+                      '2' = 0))
+return(data_censor)
+}
+
+expand_included <- function(x){
+  data<-
+  pivot_longer(x,
+    cols = contains("ale"), 
+    names_to = "Group",
+    values_to = "Freq")
+  
+data_long <-
+  data[rep(row.names(data), data$Freq), 1:5]
+
+data_included<-
+  data_long %>% 
+  separate(5, c("Sex", "Event")) %>% 
+  mutate(Event = recode(Event, 
+                      censor = 0,
+                      death = 1,
+                      stuck = 2)) %>% 
+  mutate(Group = ifelse(Event == 0, paste("censor"),
+                        ifelse(Event == 1, paste("death"),
+                               paste("stuck")))) %>% 
+  mutate(Event = recode(Event, 
+                      '0' = 0,
+                      '1' = 1,
+                      '2' = 1))
+ return(data_included)
+}
 ```  
 
-## Deciding how to handle Flies stuck to food - Line 897
+## Deciding how to handle Flies stuck to food
 
 Throughout the lifespan and given the set-up of cages, flies got stuck to the food. The incidence of which correlates very strongly with age. Line 897 below is an exception to this, whereby flies, females especially, got stuck to the food from quite early on.
 
 Below I have censored the flies that were stuck, but included the counts of flies at each score that were on the food on the second y-axis, just to visualise the susceptibility of this line. 
 
-```{r quick plot survcurv, warning=F, message=F, fig.cap="Surv curv of Line 897 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
+### Line 897
+
+```{r quick plot survcurv, warning=F, message=F}
 
 surv_object <- Surv(data_tidy$Age, data_tidy$Event)
 fit <- survfit(surv_object ~ Sex, data_tidy)
@@ -205,6 +263,7 @@ dual_axes <-
   geom_bar(aes(y=Stuck/40, fill = as.factor(Sex)), alpha = 0.4,
            stat = "identity", size=1)+
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle("Food deaths censored but counted")+
   scale_color_manual(name="Group",
                      labels = c("Female (835)", "Male (935)"),
                      values = c("firebrick", "navy"))+
@@ -217,15 +276,12 @@ dual_axes <-
                       sec.axis = sec_axis(~.*coeff, name = "Number of flies stuck to food"))+
    theme_linedraw()
   
-dual_axes
 
 
 ```
 
 
-If I include the flies on the food in the lifespan as deaths, the survival curve looks very different with females having a much lower median lifespan. 
-
-```{r 897 food-stuck included, warning=F,message=F, fig.cap="Surv curv of Line 897 with food-stuck included as deaths"}
+```{r 897 food-stuck included, warning=F,message=F}
 data_include_stuck <-
   data_long %>% 
   separate(5, c("Sex", "Event")) %>% 
@@ -252,26 +308,82 @@ Survival_table_2$Condition <- NULL
 # Plot survcurv
 Surv_included <- 
   ggplot(subset(Survival_table_2,Survival_table_2 > 0), aes(x=Time))+
-  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
-  ggtitle("Line 897 - Lifespan")+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), show.legend = F, size = 1.5)+
+  ggtitle("Line 897 (all as deaths)")+
   scale_color_manual(name="Group",
                      labels = c("Female (835)", "Male (935)"),
                      values = c("firebrick", "navy"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1),
                       breaks=c(seq(0,1,by=0.1)))+
+  theme(legend.position = "none")+
    theme_linedraw()
   
-Surv_included
+
 ```
 
-## Line 287
+```{r all 897, warning=F,message=F, fig.cap="Surv curves of Line 897"}
+
+Huang25 <- read.csv("data/Huang25ClifespanRawData.csv")
+
+Huang25 <- as.data.frame(Huang25)
+
+# Remove lines with missing values and add censor column
+Huang <-
+  Huang25 %>%
+  dplyr::select(Line, Sex, Age, Rep) %>% 
+  dplyr::group_by(Line) %>% 
+  subset(Age != ".") %>% 
+  dplyr::mutate(Event = 1)
+
+Huang$Age<- as.numeric(Huang$Age)
+
+Huang897 <-
+  Huang %>% 
+  filter(Line == "897")
+
+
+surv_object_2 <- Surv(Huang897$Age, Huang897$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, Huang897)
+
+time_check = sort(unique(Huang897$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+# Plot survcurv
+HuangCurve897 <- 
+  ggplot(Survival_table_2, aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), show.legend = F, size = 1.5)+
+  ggtitle("Huang 897")+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+  theme(legend.position = "none")+
+   theme_linedraw()
+  
+
+bottom <- plot_grid(Surv_included,HuangCurve897, labels = c("C", "D"))
+
+Line897 <- plot_grid(dual_axes, bottom, labels = c("A", ""), ncol = 1)
+Line897
+
+
+  
+```
+
+
+
+### Line 287
 
 This line didn't have as many flies stuck to the food from the get-go, but did have an uptick as deaths increase, unsurprisingly.
 
 ```{r line 287 plot prep, echo=F, message=F,, warning=F}
 
-data_287 <- read.csv(files[1])
+data_287 <- read.csv(files[2])
 
 expand_censor <- function(x){
 data<-
@@ -332,7 +444,7 @@ include_287 <- expand_included(data_287)
 ```
 
 
-```{r quick plot 287 survcurv, warning=F, fig.cap="Surv curv of Line 287 with food-stuck flies censored, but counts of which juxtaposed on seccond y-axis"}
+```{r quick plot 287 survcurv, warning=F, message=F}
 
 surv_object_2 <- Surv(censor_287$Age, censor_287$Event)
 fit_2 <- survfit(surv_object_2 ~ Sex, censor_287)
@@ -363,6 +475,7 @@ dual_axes_287<-
   geom_bar(aes(y=Stuck/40, fill = as.factor(Sex)), alpha = 0.4,
            stat = "identity", size=1)+
   geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle("Food deaths censored but counted")+
   scale_color_manual(name="Group",
                      labels = c("Female (1031)", "Male (868)"),
                      values = c("firebrick", "navy"))+
@@ -375,11 +488,11 @@ dual_axes_287<-
                       sec.axis = sec_axis(~.*coeff, name = "Number of flies stuck to food"))+
    theme_linedraw()
   
-dual_axes_287
+
 ```
 
 
-```{r line 287 included,message=F, fig.cap="Surv curv of Line 287 with food-stuck included as deaths"}
+```{r line 287 included,message=F}
 surv_object_2 <- Surv(include_287$Age, include_287$Event)
 fit_2 <- survfit(surv_object_2 ~ Sex, include_287)
 
@@ -391,17 +504,170 @@ Survival_table_2$Condition <- NULL
 # Plot survcurv
 Surv_included <- 
   ggplot(subset(Survival_table_2,Survival_table_2 > 0), aes(x=Time))+
-  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
-  ggtitle("Line 287 - Lifespan (including stuck)")+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)),show.legend = F, size = 1.5)+
+  ggtitle("Line 287 (all as deaths)")+
   scale_color_manual(name="Group",
                      labels = c("Female (1031)", "Male (868)"),
                      values = c("firebrick", "navy"))+
    scale_y_continuous("Proportion of survivors",
                       limits = c(0,1),
                       breaks=c(seq(0,1,by=0.1)))+
+  theme(legend.position = "none")+
    theme_linedraw()
-  
-Surv_included
+
 ```
 
+```{r all 287, warning=F,message=F,fig.cap="Surv curves of Line 287"}
+Huang287 <-
+  Huang %>% 
+  filter(Line == "287")
+
+
+surv_object_2 <- Surv(Huang287$Age, Huang287$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, Huang287)
+
+time_check = sort(unique(Huang287$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+# Plot survcurv
+HuangCurve287 <- 
+  ggplot(Survival_table_2, aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), show.legend = F, size = 1.5)+
+  ggtitle("Huang 287")+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+  theme(legend.position = "none")+
+   theme_linedraw()
+
+bottom <- plot_grid(Surv_included,HuangCurve287, labels = c("C", "D"))
+
+line287 <- plot_grid(dual_axes_287, bottom, labels = c("A", ""), ncol = 1)
+line287
+```
+
+### Line 109
+
+```{r line 109 plot prep, echo=F, message=F,, warning=F}
+
+data_109 <- read.csv(files[1])
+
+censor_109 <- expand_censor(data_109)
+include_109 <- expand_included(data_109)
+```
+
+
+```{r quick plot 109 survcurv, warning=F, message=F}
+
+surv_object_2 <- Surv(censor_109$Age, censor_109$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, censor_109)
+
+female_109n <- as.character(fit_2[["n"]][1])
+male_109n <- as.character(fit_2[["n"]][2])
+
+time_check = sort(unique(censor_109$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+stuck <-
+  censor_109 %>% 
+  filter(Group == "stuck") %>% 
+  mutate(Group = recode(Group, 'stuck' = 1)) %>% 
+  group_by(Age, Sex) %>% 
+  dplyr::summarise(Stuck= n()) %>% 
+  ungroup() %>% 
+  mutate(Time = Age,
+         Age = NULL)
+
+dual_data_109<-
+  merge(Survival_table_2, stuck, by=c("Time", "Sex"), all = T)
+
+coeff <- 60
+# Plot survcurv
+dual_axes_109<-
+  ggplot(dual_data_109, aes(x=Time))+
+  geom_bar(aes(y=Stuck/60, fill = as.factor(Sex)), alpha = 0.4,
+           stat = "identity", size=1)+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), size = 1.5)+
+  ggtitle("Food deaths censored but counted")+
+  scale_color_manual(name="Group",
+                     labels = c("Female (1031)", "Male (868)"),
+                     values = c("firebrick", "navy"))+
+  scale_fill_manual(name="Group",
+                     labels = c("Female (1031)", "Male (868)"),
+                     values = c("#FF6666", "#333399"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1.1),
+                      breaks=c(seq(0,1.1,by=0.1)),
+                      sec.axis = sec_axis(~.*coeff, name = "Number of flies stuck to food"))+
+   theme_linedraw()
+  
+
+```
+
+
+```{r line 109 included,message=F}
+surv_object_2 <- Surv(include_109$Age, include_109$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, include_109)
+
+time_check = sort(unique(include_109$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+# Plot survcurv
+Surv_included <- 
+  ggplot(subset(Survival_table_2,Survival_table_2 > 0), aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)),show.legend = F, size = 1.5)+
+  ggtitle("Line 109 (all as deaths)")+
+  scale_color_manual(name="Group",
+                     labels = c("Female (1031)", "Male (868)"),
+                     values = c("firebrick", "navy"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+  theme(legend.position = "none")+
+   theme_linedraw()
+
+```
+
+```{r all 109, warning=F,message=F,fig.cap="Surv curves of Line 109"}
+Huang109 <-
+  Huang %>% 
+  filter(Line == "109")
+
+
+surv_object_2 <- Surv(Huang109$Age, Huang109$Event)
+fit_2 <- survfit(surv_object_2 ~ Sex, Huang109)
+
+time_check = sort(unique(Huang109$Age))
+Survival_table_2 <- ggplotprep2(fit_2, times = c(0,time_check))
+Survival_table_2$Sex <- Survival_table_2$Condition
+Survival_table_2$Condition <- NULL
+
+# Plot survcurv
+HuangCurve109 <- 
+  ggplot(Survival_table_2, aes(x=Time))+
+  geom_line(aes(y=Survival,colour=as.factor(Sex)), show.legend = F, size = 1.5)+
+  ggtitle("Huang 109")+
+  scale_color_manual(name="Group",
+                     labels = c("Female", "Male"),
+                     values = c("firebrick", "navy"))+
+   scale_y_continuous("Proportion of survivors",
+                      limits = c(0,1),
+                      breaks=c(seq(0,1,by=0.1)))+
+  theme(legend.position = "none")+
+   theme_linedraw()
+
+bottom <- plot_grid(Surv_included,HuangCurve109, labels = c("C", "D"))
+
+line109 <- plot_grid(dual_axes_109, bottom, labels = c("A", ""), ncol = 1)
+line109
+```
 
