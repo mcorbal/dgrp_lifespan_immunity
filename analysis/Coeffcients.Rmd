@@ -964,10 +964,10 @@ All_lines_sex <- ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous("BLUD coeff",
-                      limits = c(-2,2),
-                      breaks=c(seq(-2,2,by=1)))+
-   scale_x_continuous(limits = c(-2,2),
-                      breaks=c(seq(-2,2,by=1)))+
+                      limits = c(-1.5,2),
+                      breaks=c(seq(-1,2,by=1)))+
+   scale_x_continuous(limits = c(-1,2),
+                      breaks=c(seq(-1,2,by=1)))+
    geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual("Age",
                        values = c("darkgreen", "darkorchid"))+
@@ -990,10 +990,10 @@ ungrouped_All_lines_sex <-
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous("BLUD coeff",
-                      limits = c(-2,2),
-                      breaks=c(seq(-2,2,by=1)))+
-   scale_x_continuous(limits = c(-2,2),
-                      breaks=c(seq(-2,2,by=1)))+
+                      limits = c(-1.5,2),
+                      breaks=c(seq(-1,2,by=1)))+
+   scale_x_continuous(limits = c(-1,2),
+                      breaks=c(seq(-1,2,by=1)))+
    geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual("Age",
                        values = c("darkgreen", "darkorchid"))+
