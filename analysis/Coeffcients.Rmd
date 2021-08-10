@@ -891,7 +891,7 @@ All_lines_age
 
 ungrouped_All_lines_age <- 
   ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
-   facet_nested(~Sex)+
+   facet_wrap(~Sex)+
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
