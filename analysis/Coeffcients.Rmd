@@ -779,8 +779,8 @@ pND <-
    scale_y_continuous("BLUD coeff",
                       limits = c(-1.5,2.5),
                       breaks=c(seq(-1.5,1.5,by=1)))+
-   scale_x_continuous(limits = c(-1,4),
-                      breaks=c(seq(-1,4,by=1)))+
+   scale_x_continuous(limits = c(-1,1),
+                      breaks=c(seq(-1,1,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
@@ -808,16 +808,15 @@ Cox_BLUD_coeff_AGE
 
 pMB <- grid.arrange(
   ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased" &
-                   Line %in% c("732", "821", "897", "907")), aes(beta, PLUD), scale="globalminmax") +
-  geom_vline(xintercept = 0, linetype = 2) +
+                   Line %in% c("732", "821", "59", "386")), aes(beta, PLUD), scale="globalminmax") +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous("BLUD coeff",
-                      limits = c(-2,2.5),
-                      breaks=c(seq(-2,2.5,by=1)))+
-   scale_x_continuous(limits = c(-1,4),
-                      breaks=c(seq(-1,3,by=1)))+
+                      limits = c(-1,1.5),
+                      breaks=c(seq(-1,1,by=1)))+
+   scale_x_continuous(limits = c(0,2),
+                      breaks=c(seq(0,2,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
@@ -829,16 +828,15 @@ pMB <- grid.arrange(
          legend.position = "none",
          legend.text = element_text(size = 12, face = "bold")),
   ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased" &
-                   Line %in% c("59", "386", "517", "730")), aes(beta, PLUD), scale="globalminmax") +
-  geom_vline(xintercept = 0, linetype = 2) +
+                   Line %in% c("897", "907", "517", "730")), aes(beta, PLUD), scale="globalminmax") +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous("BLUD coeff",
-                      limits = c(-2,2.5),
-                      breaks=c(seq(-2,2.5,by=1)))+
-   scale_x_continuous(limits = c(-1,4),
-                      breaks=c(seq(-1,3,by=1)))+
+                      limits = c(-2,1.5),
+                      breaks=c(seq(-2,1,by=1)))+
+   scale_x_continuous(limits = c(0,4.2),
+                      breaks=c(seq(0,4,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
@@ -893,7 +891,7 @@ All_lines_age
 
 ungrouped_All_lines_age <- 
   ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
-   facet_nested(Sex ~ .)+
+   facet_nested(~Sex)+
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
