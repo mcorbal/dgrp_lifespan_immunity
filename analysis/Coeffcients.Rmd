@@ -892,6 +892,8 @@ All_lines_age
 ungrouped_All_lines_age <- 
   ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
    facet_wrap(~Sex)+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
@@ -985,6 +987,8 @@ All_lines_sex
 ungrouped_All_lines_sex <- 
   ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
    facet_wrap(Age_at_infection ~ .)+
+   geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
