@@ -517,16 +517,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytree445b005e2baa6fdd1f7b745afe3a70b4fab8d647targetblank445b005a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/445b005e2baa6fdd1f7b745afe3a70b4fab8d647" target="_blank">445b005</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytreeebb4b09666f95642bb84c2f5f14cb4eae6bf253ftargetblankebb4b09a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/ebb4b09666f95642bb84c2f5f14cb4eae6bf253f" target="_blank">ebb4b09</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytree445b005e2baa6fdd1f7b745afe3a70b4fab8d647targetblank445b005a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommcorbaldgrplifespanimmunitytreeebb4b09666f95642bb84c2f5f14cb4eae6bf253ftargetblankebb4b09a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/445b005e2baa6fdd1f7b745afe3a70b4fab8d647" target="_blank">445b005</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/mcorbal/dgrp_lifespan_immunity/tree/ebb4b09666f95642bb84c2f5f14cb4eae6bf253f" target="_blank">ebb4b09</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -703,6 +703,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/ebb4b09666f95642bb84c2f5f14cb4eae6bf253f/analysis/Coeffcients.Rmd" target="_blank">ebb4b09</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+<td>
+Update axes and ungroup all lines
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mcorbal/dgrp_lifespan_immunity/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/Coeffcients.html" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1230,10 +1264,10 @@ pFB &lt;- ggplot(subset(Hazard_Blud, Lifespan_actual == &quot;Female_biased&quot
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
-   scale_x_continuous(limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
+                      limits = c(-1,1.5),
+                      breaks=c(seq(-1,1.5,by=1)))+
+   scale_x_continuous(limits = c(-1,2),
+                      breaks=c(seq(-1,2,by=1)))+
    facet_nested(~Lifespan_actual + Line)+
    geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual(&quot;Age&quot;,
@@ -1252,10 +1286,10 @@ pND &lt;- ggplot(subset(Hazard_Blud, Lifespan_actual == &quot;Non_dimorphic&quot
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
-   scale_x_continuous(limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
+                      limits = c(-1,1),
+                      breaks=c(seq(-1,1,by=1)))+
+   scale_x_continuous(limits = c(-1,2),
+                      breaks=c(seq(-1,2,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual(&quot;Age&quot;,
@@ -1284,19 +1318,56 @@ Cox_BLUD_coeff_SEX</code></pre>
 Sex effects on BLUD for female-biased and non-dimorphic lines
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-coxph-analysis-Sex-1">
+Past versions of “coxph analysis Sex-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-coxph-analysis-Sex-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/figure/Coeffcients.Rmd/coxph analysis Sex-1.png" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># Male_biased
 pMB &lt;-grid.arrange(
    ggplot(subset(Hazard_Blud, Lifespan_actual == &quot;Male_biased&quot; &amp;
-                   Line %in% c(&quot;732&quot;, &quot;821&quot;, &quot;897&quot;, &quot;907&quot;)) , aes(beta, PLUD), scale=&quot;globalminmax&quot;) +
+                   Line %in% c(&quot;730&quot;, &quot;821&quot;, &quot;386&quot;, &quot;907&quot;)) , aes(beta, PLUD), scale=&quot;globalminmax&quot;) +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
-   scale_x_continuous(limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
+                      limits = c(-1,0.5),
+                      breaks=c(seq(-0.5,0.5,by=1)))+
+   scale_x_continuous(limits = c(-3.5,0.6),
+                      breaks=c(seq(-3,1,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual(&quot;Age&quot;,
@@ -1309,16 +1380,16 @@ pMB &lt;-grid.arrange(
          legend.position = &quot;none&quot;,
          legend.text = element_text(size = 12, face = &quot;bold&quot;)),
   ggplot(subset(Hazard_Blud, Lifespan_actual == &quot;Male_biased&quot; &amp;
-                   Line %in% c(&quot;59&quot;, &quot;386&quot;, &quot;517&quot;, &quot;730&quot;)) , aes(beta, PLUD), scale=&quot;globalminmax&quot;) +
+                   Line %in% c(&quot;59&quot;, &quot;897&quot;, &quot;517&quot;, &quot;732&quot;)) , aes(beta, PLUD), scale=&quot;globalminmax&quot;) +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
-   scale_x_continuous(limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
+                      limits = c(-1.5,2),
+                      breaks=c(seq(-1,2,by=1)))+
+   scale_x_continuous(limits = c(-1,2.5),
+                      breaks=c(seq(-1,2,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual(&quot;Age&quot;,
@@ -1336,6 +1407,43 @@ pMB &lt;-grid.arrange(
 <p class="caption">
 Sex effects on BLUD for male-biased lines
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-coxph-analysis-Sex-male_biased-1">
+Past versions of “coxph analysis Sex male_biased-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-coxph-analysis-Sex-male_biased-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/figure/Coeffcients.Rmd/coxph analysis Sex male_biased-1.png" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <pre class="r"><code>pMB</code></pre>
 <pre><code>TableGrob (2 x 1) &quot;arrange&quot;: 2 grobs
@@ -1431,10 +1539,10 @@ pFB &lt;- ggplot(subset(Hazard_Blud, Lifespan_actual == &quot;Female_biased&quot
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-2,3),
-                      breaks=c(seq(-2,3,by=1)))+
-   scale_x_continuous(limits = c(-1,4),
-                      breaks=c(seq(-1,4,by=1)))+
+                      limits = c(-1.5,0.5),
+                      breaks=c(seq(-1.5,0.5,by=1)))+
+   scale_x_continuous(limits = c(-1,2),
+                      breaks=c(seq(-1,2,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c(&quot;firebrick&quot;, &quot;deepskyblue1&quot;))+
@@ -1453,8 +1561,8 @@ pND &lt;-
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-2,3),
-                      breaks=c(seq(-2,3,by=1)))+
+                      limits = c(-1.5,2.5),
+                      breaks=c(seq(-1.5,1.5,by=1)))+
    scale_x_continuous(limits = c(-1,4),
                       breaks=c(seq(-1,4,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
@@ -1481,6 +1589,43 @@ Cox_BLUD_coeff_AGE</code></pre>
 Age effects on BLUD for female-biased and non-dimorphic lines
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Cox-analysis-Age-1">
+Past versions of “Cox analysis Age-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-Cox-analysis-Age-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/figure/Coeffcients.Rmd/Cox analysis Age-1.png" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>pMB &lt;- grid.arrange(
   ggplot(subset(Hazard_Blud, Lifespan_actual == &quot;Male_biased&quot; &amp;
                    Line %in% c(&quot;732&quot;, &quot;821&quot;, &quot;897&quot;, &quot;907&quot;)), aes(beta, PLUD), scale=&quot;globalminmax&quot;) +
@@ -1489,10 +1634,10 @@ Age effects on BLUD for female-biased and non-dimorphic lines
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-2,3),
-                      breaks=c(seq(-2,3,by=1)))+
+                      limits = c(-2,2.5),
+                      breaks=c(seq(-2,2.5,by=1)))+
    scale_x_continuous(limits = c(-1,4),
-                      breaks=c(seq(-1,4,by=1)))+
+                      breaks=c(seq(-1,3,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c(&quot;firebrick&quot;, &quot;deepskyblue1&quot;))+
@@ -1510,10 +1655,10 @@ Age effects on BLUD for female-biased and non-dimorphic lines
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
    scale_y_continuous(&quot;BLUD coeff&quot;,
-                      limits = c(-2,3),
-                      breaks=c(seq(-2,3,by=1)))+
+                      limits = c(-2,2.5),
+                      breaks=c(seq(-2,2.5,by=1)))+
    scale_x_continuous(limits = c(-1,4),
-                      breaks=c(seq(-1,4,by=1)))+
+                      breaks=c(seq(-1,3,by=1)))+
    facet_nested(~Lifespan_actual+Line)+
    geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c(&quot;firebrick&quot;, &quot;deepskyblue1&quot;))+
@@ -1530,6 +1675,43 @@ Age effects on BLUD for female-biased and non-dimorphic lines
 <p class="caption">
 Age effects on BLUD for male-biased lines
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-coxph-analysis-Age-male_biased-1">
+Past versions of “coxph analysis Age male_biased-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-coxph-analysis-Age-male_biased-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/figure/Coeffcients.Rmd/coxph analysis Age male_biased-1.png" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <pre class="r"><code>pMB</code></pre>
 <pre><code>TableGrob (2 x 1) &quot;arrange&quot;: 2 grobs
@@ -1550,6 +1732,49 @@ Age effects on BLUD for male-biased lines
 Age effects on BLUD for all lines
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Age-beta-and-coeffiecients-for-all-lines-as-replicates-1">
+Past versions of “Age beta and coeffiecients for all lines as replicates-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-Age-beta-and-coeffiecients-for-all-lines-as-replicates-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/figure/Coeffcients.Rmd/Age beta and coeffiecients for all lines as replicates-1.png" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figure/Coeffcients.Rmd/Age%20beta%20and%20coeffiecients%20for%20all%20lines%20ungrouped%20as%20replicates-1.png" alt="Age effects on BLUD for all lines, ungrouped" width="672" />
+<p class="caption">
+Age effects on BLUD for all lines, ungrouped
+</p>
+</div>
 </div>
 <div id="sex-effects-with-all-lines-plotted-as-replicates" class="section level1">
 <h1>Sex-effects with all lines plotted as replicates</h1>
@@ -1564,6 +1789,49 @@ Age effects on BLUD for all lines
 <img src="figure/Coeffcients.Rmd/Sex%20beta%20and%20coeffiecients%20for%20all%20lines%20as%20replicates-1.png" alt="Sex effects on BLUD for all lines" width="672" />
 <p class="caption">
 Sex effects on BLUD for all lines
+</p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Sex-beta-and-coeffiecients-for-all-lines-as-replicates-1">
+Past versions of “Sex beta and coeffiecients for all lines as replicates-1.png”
+</button>
+</p>
+<div id="fig-no-spaces-Sex-beta-and-coeffiecients-for-all-lines-as-replicates-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mcorbal/dgrp_lifespan_immunity/blob/130ff5e495fb5f5c040a67f96bfbe34bb8197533/docs/figure/Coeffcients.Rmd/Sex beta and coeffiecients for all lines as replicates-1.png" target="_blank">130ff5e</a>
+</td>
+<td>
+mcorbal
+</td>
+<td>
+2021-08-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figure/Coeffcients.Rmd/Sex%20beta%20and%20coeffiecients%20for%20all%20lines%20ungrouped%20as%20replicates-1.png" alt="Sex effects on BLUD for all lines, ungrouped" width="672" />
+<p class="caption">
+Sex effects on BLUD for all lines, ungrouped
 </p>
 </div>
 <br>
