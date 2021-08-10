@@ -1,8 +1,7 @@
 ---
-title: "Survival - plots and statistical analysis"
-subtitle: "Comparative survival to *P. rettgeri* challenge of young and old flies"
-author: "Mary-Kate Corbally"
-date: "2021-06-08"
+title: "Relating Lifespan and Immunity"
+author: "Mary-Kate"
+date: "09/08/2021"
 output: 
   workflowr::wflow_html:
     toc: true
@@ -13,9 +12,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-This document was created in R Markdown and translated into html using the R package 'R knitr'. To unveil or hide code behind graphical and tabular outputs, toggle the **Code** buttons. 
-
-## Load Libraries, datastes and then tidy
+# Load Libraries, datastes and then tidy
 
 ```{r libraries, message=F, warning=F, results='hide'}
 library(survival) # survival functions
@@ -84,7 +81,7 @@ data_tidy <-
          
 ```
 
-```{r functions, results= F }
+```{r functions, results= FALSE }
 # Function to extract CoxME table
 
  extract_coxme_table <- function (mod){
@@ -151,225 +148,65 @@ y_labs <- c(paste(new$id[1]),
       paste(new$id[4]))
 y_labs
 }
-
-```
-## Variation in initial dose throughout experiment
-
-```{r time0 dose, echo=F, fig.cap="Initial dose variation over course of experiment"}
-Dose_data <- read.csv("data/Time0.csv", header = T)
-
-Dose_sum <- 
-   Dose_data %>% 
-   group_by(Date_of_infection) %>% 
-   dplyr::summarise(Mean = mean(OD),
-                    sd = sd(OD)) %>% 
-   complete(Date_of_infection)
-      
-
-
-Dose_data$Date_of_infection <- 
-  factor(Dose_data$Date_of_infection, levels = c("10/04/2021", "16/04/2021", "22/04/2021", "28/04/2021",
-                                                "05/05/2021", "11/05/2021", "17/05/2021", "23/05/2021"))
-Initial_dose_2 <-
-   ggplot(Dose_data, aes(Date_of_infection, OD)) +
-   geom_boxplot(aes(fill = as.factor(Date_of_infection)))+
-   scale_x_discrete("Date of Infection")+
-   scale_y_continuous("Initial Dose (CFU/fly)")
-   
-Initial_dose_2
-```
-
-## Perform CoxME and plot survival curves
-
-```{r n number, warning=FALSE}
-# use survobject to get n number and subsequent dataframe  
-
-data_grouped <-
-  data_tidy %>% 
-  unite("line_sex_age", c(4,7,9), sep = "_", remove = F) %>% 
-  mutate(across(line_sex_age, as.factor))
-
-surv_group <- survfit(Surv(time= Time_of_death, event = Censor)
-                    ~ line_sex_age, data = data_grouped)
-
-# Create df with n numbers via line_sex_age
-conditions <- as.vector(levels(data_grouped$line_sex_age))
-n.number <- as.vector(surv_group[["n"]])
-df <- data.frame(conditions, n.number)
-
-n.df <- 
-  df %>% 
-  separate(1, c("Line", "Sex", "Age"))
-
-
-```
-
-```{r survplot all, warning=F, echo=F, fig.cap="Survival Plots for all Lines, suffixed with block number"}
-# FOR PLOTTING
-# Create 'condition' grouping variable 
-data_grouped <-
-  data_tidy %>% 
-  unite("Group", c(7,9), sep = "_", remove = F) %>% 
-  mutate(across(Group, as.factor))
-
-#create time argument for ggplotprep2
-time_check = sort(unique(data_grouped$Time_to_death))
-
-#Create dataframe with extracted survival probability for groups
-Grouped_surv<-
-  data_grouped %>%
-  unite("Line_Block", c(4,9), sep = "_", remove = F) %>% #grouping variable to handle block control
-  group_by(Line_Block) %>% 
-  nest() %>% 
-  dplyr::mutate(Surv_object = map(data, ~survfit(Surv(time= Time_to_death, event = Censor) ~ Group,  data=.x))) %>% 
-  dplyr::mutate(survival_plot =  map(Surv_object, ggplotprep2, times=c(0,time_check))) %>% 
-  ungroup() %>% 
-  transmute(Line_Block, survival_plot) %>% 
-  unnest(survival_plot)
-
-# reorder values for faceting 
-Grouped_surv$Line_Block <- 
-  factor(Grouped_surv$Line_Block, levels = c("821_4", "386_4", "730_4", "732_4","821_3", 
-                                             "517_3", "907_3", "59_3", "821_1", "109_1", 
-                                             "287_1", "304_1", "821_2", "21_2", "897_2"))
-
- survplot_all <-
-   ggplot(subset(Grouped_surv,Survival!=0), aes(x=Time,y=Survival,colour=as.factor(Condition)))+
-   facet_wrap(~Line_Block)+
-   geom_line(aes(linetype=as.factor(Condition)),size=1.2)+
-   geom_point(size = 0.7)+
-   scale_color_manual(name="Group",
-                     labels = c("Female 10 do", "Female 35 do", "Male 10  do", "Male 35 do"),
-                     values = c("red","red","blue","blue"))+
-   scale_linetype_manual(name="Group",
-                        values=c("solid","dashed", "solid","dashed"),
-                        labels=c("Female 10 do", "Female 35 do", "Male 10  do", "Male 35 do"))+
-   scale_x_continuous("Hours Post Injection",
-                     limits=c(0, 36),
-                     breaks=c(seq(0,36,by=2)))+
-   scale_y_continuous("Proportion of survivors",
-                     limits=c(0, 1),breaks=c(0,0.2,0.4,0.6,0.8,1))+
-   labs(colour = "Group", linetype = "Group")+
-   theme_linedraw()+
-   theme(strip.text.x = element_text(size=10),
-         legend.direction = "vertical", 
-         legend.box = "horizontal",
-         legend.title = element_text(face="italic",size=Smallfont), 
-         legend.key = element_rect(colour = 'white', fill = "white", linetype='dashed'),
-         legend.text = element_text(size=Smallfont),
-         legend.background = element_rect(fill=NA),
-         plot.margin = unit(c(0,0,1.2,0), "cm"))+
-   guides(shape=guide_legend(ncol=1),
-         fill=guide_legend(ncol=1),
-         col=guide_legend(ncol=1))
-  
-survplot_all
- 
 ```
 
 
+# BLUD modelling
 
-## BLUD assesment
+BLUD was modelled in each line separately with a) Sex and b) Age as fixed effects, the fit of these models was then used for parametric bootstraping in order to estimate standard errors and coefficients. The first chunk of code below shows the steps for clarity but in interest of time, I will load the ultimate dataframe from these analyses for later use. 
 
-- For first three blocks day 10 infections, I averaged across dilutions and across duplicates with my method since predated JAVA counter. Stored in BLUD_mean_reps column in SURV_D111-D113.csv files
-- For day 35, will import the config_counts.csv, multiply dilution column by counts, group by plate and well, then average across replicates then merge SURV_D213 dataframe with counts via sample ID.
+Outliers were removed by subtracting/adding 1.5 times the interquartile range from the 0.25 and 0.75 quantile, respectively.   
+-Q2 - 1.5*IQR 
+-Q3 + 1.5*IQR
 
+Line 821, the block control, was modeled separately to account for block as a random effect and then combined with the others.
 
-```{r BLUD functions, warning=F, echo=F, results=F}
-# Conifg data for day10 block 4 and all day35 infections
-# merge these with individual surv files containing pre-calculated BLUD means (bar block 1 which had, awfully, only replicate)
-
-CONFIG = read.csv("data/COUNTS_config_MK_210628.csv")
-
-most_counts <- 
-   CONFIG %>% 
-   mutate(counts = na_if(PROVIDENCIA,"Inf")) %>% 
-   select(c(1:8, 13)) %>% 
-   mutate(CFU_ml = counts * Dilution/0.005,
-          CFU_FLY = CFU_ml * 0.250) %>% 
-   filter(CFU_FLY > 0) %>% 
-   dplyr::group_by(Plate, WELL) %>% 
-   dplyr::summarise(BLUD_mean_reps = mean(CFU_FLY)) %>% 
-   unite(sample_ID, 1:2, sep = "_")
-
-# Create sample_ID in data_tidy 
-data_tidy_s <-
-   data_tidy%>% 
-   filter(BLUD_plate != "") %>% 
-   select(1:23) %>% 
-   unite(sample_ID, 22:23, sep =  "_" )
-
-surv_blud_merge <- merge(data_tidy_s,most_counts, by="sample_ID")
-
-rest_off_counts <-
-   data_tidy %>% 
-   filter(BLUD_mean_reps > 0) %>% 
-   select(c(1:21,24)) %>% 
-   mutate(log_BLUD = log10(BLUD_mean_reps)) %>% 
-   unite(Group, c(7,9), sep = "_", remove = F)
-   
-
-surv_blud <-
-   surv_blud_merge %>% 
-   select(-1) %>% 
-   mutate(log_BLUD = log10(BLUD_mean_reps)) %>% 
-   unite(Group, c(7,9), sep = "_", remove = F) %>% 
-   rbind(rest_off_counts) %>% 
-   mutate(across(Group, as.factor))
-
-   
-
-# stats for comparisons of groups 
-stat_func <- function(x){
-   stat.test <- 
-      surv_blud %>%
-      dplyr::filter(Line == x) %>%
-      wilcox_test(log_BLUD ~ Group) %>%
-      adjust_pvalue(method = "bonferroni") %>%
-      add_significance() %>% 
-      add_xy_position(x = "Group") 
-   stat.test
-}
-
-# visualise all with facet-wrap
-
-ylab <- expression(paste(log[10],"(BLUD)"))
-BLUD_plot_func <- function(x,y,z,w){
-   
-   ggplot(subset(surv_blud, Line == x), 
-          aes(x = .data[[y]], 
-              y = .data[[z]]))+
-   geom_boxplot(aes(colour = as.factor(Sex), fill = as.factor(Sex)),
-                outlier.shape = NA,
-                alpha = 0.4)+
-   geom_point(aes(colour = as.factor(Sex)),
-              position = position_jitterdodge(dodge.width = 0.8),
-              alpha = 0.6,
-              size = 2)+
-   scale_color_manual("Sex", 
-                      values = c("coral", "steelblue4"))+
-   scale_fill_manual("Sex", 
-                      values = c("coral", "steelblue4"))+
-   scale_y_continuous(ylab)+
-   scale_x_discrete("Group",
-                    labels = c("1O do Females", "35 do Females",
-                               "10 do Males", "35 do Males"))+
-   ggtitle(paste("BLUD data Line", x))+
-   labs(subtitle = "Tolerance estimates between the sexes at young and old",
-        colour = "Sex",
-        caption = "Adjusted p-values result from Bonferroni-corrected pairwise Wilcoxon tests")+
-   theme_bw()+
-      theme(axis.text.x = element_text(face = "bold"))+
-   stat_pvalue_manual(w,
-                      hide.ns = T)
-}
+Lines with <5 individuals per condition are annotated with a "*" on the plots.
 
 
+## Sex Coefficients
+
+Direction and nature of Lifespan was determined through Coxme/coxph on lifespan data I obtained, where food events were censored.  I've included the n number for actual deaths in a table. All coefficients are relative to Females.
+
+My interpretation of these plots is:
+
+* Points in upper left quadrant: Females are more susceptible due to lower tolerance 
+* Points in upper right quadrant: Males are more susceptible due to lower resistance
+* Points in lower right quadrant: Males are more susceptible due to lower tolerance
+* Points in lower left quadrant: Females are more susceptible due to lower resistance
+
+```{r table for numbers of dry deaths}
+
+load("data/lifespanCountdeaths.RData")
+
+lifespan_death_counts <-
+   lifespanCountdeaths %>%  
+   dplyr::group_by(Line, Sex) %>% 
+   dplyr::summarise(mean_deaths = round(mean(Event)))
+
+# Load the beta values for lifespan and merge with death_counts above 
+load("data/cox_lifespan_all.RData")
+
+LS_direction <- as.vector(c("Non_dimorphic", "Male_biased", "Non_dimorphic", "Female_biased", "Female_biased", 
+                         rep("Male_biased", length.out=7)))
+lifespan_beta_counts <- 
+   lifespan_death_counts %>% 
+   pivot_wider(names_from = Sex, values_from = mean_deaths) %>% 
+   merge(cox_lifespan_all, by="Line") %>% 
+   dplyr::rename(beta_lifespan = beta,
+          se_lifespan = se,
+          z_lifespan = z,
+          p_lifespan = p,
+          Female_deaths = Female,
+          Male_deaths = Male) %>% 
+   dplyr::mutate(Lifespan_actual = LS_direction)
 
 
+kable(lifespan_beta_counts[,1:5], caption = "Dry deaths per sex per line and beta estimates") %>% 
+  kable_styling(full_width = T)
 ```
 
-```{r BLUD modelling Sex, echo=FALSE }
+```{r BLUD modelling Sex, warning = FALSE,include=FALSE}
 
 # Try to analyse the raw BLUD data as per David's spaMM method
 
@@ -443,8 +280,103 @@ Config <-
    fill(Lit_lifespan, Line, Sex,Block, Age_at_infection, Time_of_death, .direction = "down")
    
 
- load("data/lPLUD.RData")
+   
+#########################################################
+# young  
+#########################################################
 
+## Find interquatile range so you can remove outliers 1.5*IQR above/below 0.75/0.25 quantile. 
+# Range_per_group <- 
+#  subset(Config,is.finite(PROVIDENCIA) & PROVIDENCIA !=0 & !is.na(PROVIDENCIA) & !is.na(Line) &
+#            Age_at_infection == 10) %>%
+#  mutate(Age_at_infection=factor(Age_at_infection),
+#         Sex = factor(Sex),
+#         Line=factor(Line),
+#         across(where(is.character),factor),
+#         across(Dilution, as.character),
+#         across(Dilution, as.numeric)) %>% 
+#   dplyr::group_by(Sample_ID) %>% 
+#   mutate(Counts = log(PROVIDENCIA* Dilution)) %>% 
+#   dplyr::ungroup() %>% 
+#   unite(Group, c(11,13:14), sep = "_", remove = F) %>% 
+#   dplyr::group_by(Group) %>% 
+#   dplyr::summarise(Q25 = quantile(Counts, probs = 0.25),
+  #                  IQR = IQR(Counts),
+ #                   Q75 = quantile(Counts, probs = 0.75),
+   #                 up = Q75+1.75*IQR,
+    #                low = Q25 - 1.5*IQR) 
+
+# dtmp_young = NULL
+# dtmp_young =
+#  subset(Config,is.finite(PROVIDENCIA) & PROVIDENCIA !=0 & !is.na(PROVIDENCIA) & !is.na(Line) &
+#            Age_at_infection == 10) %>%
+#  mutate(Age_at_infection=factor(Age_at_infection),
+ #        Sex = factor(Sex),
+#         Line=factor(Line),
+#         across(where(is.character),factor),
+#         across(Dilution, as.character),
+#         across(Dilution, as.numeric)) %>% 
+#   dplyr::group_by(Sample_ID) %>% 
+ #  mutate(Counts = log(PROVIDENCIA* Dilution)) %>% 
+#   dplyr::ungroup() %>% 
+#   unite(Group, c(11,13:14), sep = "_", remove = F) %>% 
+#   merge(Range_per_group, by="Group", all = T) %>% 
+#   dplyr::group_by(Group) %>% 
+#   dplyr::filter(Counts > low & Counts < up)
+
+# Model_lists.1 <-
+#   subset(dtmp_young, Line != 821) %>% 
+#   dplyr::group_by(Line) %>% 
+#   nest() %>% 
+#   dplyr::mutate(myoung = map(data, ~fitme(PROVIDENCIA ~ Sex +  (1|Sample_ID) + offset(-log(Dilution)),
+#           family=negbin(link="log"),
+#           data=.x))) %>% 
+#   select(Line, myoung) 
+
+# Block effects in Line 821
+# Model_lists <-
+#   subset(dtmp_young, Line == 821) %>% 
+#   dplyr::group_by(Line) %>% 
+#   nest() %>% 
+#   dplyr::mutate(myoung = map(data, ~fitme(PROVIDENCIA ~ Sex + (1|Block|Sample_ID) + offset(-log(Dilution)),
+#           family=negbin(link="log"),
+#           data=.x))) %>% 
+#   select(Line, myoung) %>% 
+#   rbind(Model_lists.1)
+
+# simPLUD = function(y,what=NULL,m, ...) {
+#   data = m$data
+#    data$PROVIDENCIA = y ## replaces original response (! more complicated for binomial fits)
+#    full_call = getCall(m) ## call for full fit
+#    full_call$data = data
+#    res = eval(full_call) ## fits the full model on the simulated response
+#    if (!is.null(what)) res = eval(what) ## post-process the fit
+#    return(res) ## the fit, or anything produced by evaluating 'what'
+#  }
+  # where the 'what' argument (not required) of myfun() allows one to control
+  # what the function returns without redefining the function.
+
+# #################################################################  
+# 
+##821
+# boot.test = NULL
+# my821=Model_lists$myoung[[1]]
+# boot.test = spaMM_boot(my821, simuland = simPLUD, nsim=50,what=quote(fixef(res)),type='marginal',m=my821)
+# save(boot.test,file="output/Bootstrap821_PLUD_Prett_10do_Sex.Rdata")
+##304
+# boot.young.304 = NULL
+# my304=Model_lists$myoung[[5]]
+# boot.young.304 = spaMM_boot(my304, simuland = simPLUD, nsim=50,what=quote(fixef(res)),type='marginal', m=my304)
+# save(boot.young.304,file="output/Bootstrap304_PLUD_Prett_10do_Sex.Rdata")
+
+# etc..
+
+## Repeated for old
+
+# Ultimately ending up with 
+load("data/lPLUD.RData")
+
+####################### my method ###################################
 
 # My own method for calculating BLud
 
@@ -459,6 +391,12 @@ BLUD_mean<-
    dplyr::group_by(Sample_ID) %>% 
    dplyr::summarise(BLUD_mean_reps = mean(CFU_FLY)) 
 
+rest_off_counts <-
+   data_tidy %>% 
+   filter(BLUD_mean_reps > 0) %>% 
+   select(c(1:21,24)) %>% 
+   mutate(log_BLUD = log10(BLUD_mean_reps)) %>% 
+   unite(Group, c(7,9), sep = "_", remove = F)
 # Create sample_ID in data_tidy 
 data_tidy_mean <-
    data_tidy %>% 
@@ -484,7 +422,7 @@ surv_blud <-
 
 ```
 
-```{r coxph analysis Sex, warning=F, fig.cap="Corresponding regression coefficients"}
+```{r coxph analysis Sex, warning=FALSE, fig.cap="Sex effects on BLUD for female-biased and non-dimorphic lines"}
 
 # For block control, do cox separately and fit block as a random effect:
 sex.coxme.age.effs821 <-
@@ -528,7 +466,6 @@ Line_lifespan <-
    select(c(1:3, 6:7))
 
 # Now compare lifespan data obtained through censoring of food death
-load("data/lifespanCountdeaths.RData")
 
 lifespan_death_counts <-
    lifespanCountdeaths %>%  
@@ -588,7 +525,7 @@ pFB <- ggplot(subset(Hazard_Blud, Lifespan_actual == "Female_biased"), aes(beta,
    scale_x_continuous(limits = c(-4,4),
                       breaks=c(seq(-4,4,by=2)))+
    facet_nested(~Lifespan_actual + Line)+
-   geom_point(aes(colour = Age_at_infection), size =3) +
+   geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual("Age",
                        values = c("darkgreen", "darkorchid"))+
    geom_text(aes(label = paste(Female_n)), nudge_y = 0.8,size = 7)+
@@ -597,7 +534,7 @@ pFB <- ggplot(subset(Hazard_Blud, Lifespan_actual == "Female_biased"), aes(beta,
    theme(legend.position = "none",
          strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1)
-pFB
+
 # non dimorphic
 pND <- ggplot(subset(Hazard_Blud, Lifespan_actual == "Non_dimorphic"), aes(beta, PLUD), scale="globalminmax") +
   geom_vline(xintercept = 0, linetype = 2) +
@@ -610,7 +547,7 @@ pND <- ggplot(subset(Hazard_Blud, Lifespan_actual == "Non_dimorphic"), aes(beta,
    scale_x_continuous(limits = c(-4,4),
                       breaks=c(seq(-4,4,by=2)))+
    facet_nested(~Lifespan_actual+Line)+
-   geom_point(aes(colour = Age_at_infection), size =3) +
+   geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual("Age",
                        values = c("darkgreen", "darkorchid"))+
    geom_text(aes(label = paste(Female_n)), nudge_y = 0.8,size = 7)+
@@ -618,14 +555,27 @@ pND <- ggplot(subset(Hazard_Blud, Lifespan_actual == "Non_dimorphic"), aes(beta,
    theme_light()+
    theme(strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1,
-         legend.position = "bottom",
+         legend.position = "none",
          legend.text = element_text(size = 12, face = "bold"))
 
+# Combine plots
+
+Cox_BLUD_coeff_SEX <- 
+  ggpubr::ggarrange(pFB, pND, # list of plots # labels
+                  common.legend = T, # COMMON LEGEND, # legend position,
+                  legend = "bottom",
+                  align = "hv", # Align them both, horizontal and vertical
+                  nrow = 1)
+
+Cox_BLUD_coeff_SEX
+
+```
+
+```{r coxph analysis Sex male_biased, warning=FALSE, fig.cap="Sex effects on BLUD for male-biased lines"}
 # Male_biased
-pMB <-
-   grid.arrange(
-   ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased"
-                 & Line %in% c("59", "386", "517", "730")) , aes(beta, PLUD), scale="globalminmax") +
+pMB <-grid.arrange(
+   ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased" &
+                   Line %in% c("732", "821", "897", "907")) , aes(beta, PLUD), scale="globalminmax") +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
@@ -636,7 +586,7 @@ pMB <-
    scale_x_continuous(limits = c(-4,4),
                       breaks=c(seq(-4,4,by=2)))+
    facet_nested(~Lifespan_actual+Line)+
-   geom_point(aes(colour = Age_at_infection), size =3) +
+   geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual("Age",
                        values = c("darkgreen", "darkorchid"))+
    geom_text(aes(label = paste(Female_n)), nudge_y = 0.8,size = 7)+
@@ -644,10 +594,10 @@ pMB <-
    theme_light()+
    theme(strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1,
-         legend.position = "bottom",
+         legend.position = "none",
          legend.text = element_text(size = 12, face = "bold")),
-  ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased"
-                 & Line %in% c("732", "821", "897", "907")) , aes(beta, PLUD), scale="globalminmax") +
+  ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased" &
+                   Line %in% c("59", "386", "517", "730")) , aes(beta, PLUD), scale="globalminmax") +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
@@ -657,8 +607,8 @@ pMB <-
                       breaks=c(seq(-4,4,by=2)))+
    scale_x_continuous(limits = c(-4,4),
                       breaks=c(seq(-4,4,by=2)))+
-   facet_nested(~Line)+
-   geom_point(aes(colour = Age_at_infection), size =3) +
+   facet_nested(~Lifespan_actual+Line)+
+   geom_point(aes(colour = Age_at_infection), size =2.5) +
    scale_colour_manual("Age",
                        values = c("darkgreen", "darkorchid"))+
    geom_text(aes(label = paste(Female_n)), nudge_y = 0.8,size = 7)+
@@ -666,45 +616,27 @@ pMB <-
    theme_light()+
    theme(strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1,
-         legend.position = "bottom",
+         legend.position = "none",
          legend.text = element_text(size = 12, face = "bold")),
-   nrow=2)
+  nrow=2)
+
+
+
 pMB
-# Combine plots
-
-Cox_BLUD_coeff_SEX <- plot_grid(pFB, pND, pMB, nrow = 2)
 
 ```
 
-```{r Sex beta and coeffiecients for all lines as replicates, warning=F, echo=F,}
+## Age Coeffcients 
+All coefficients are relative to young. 
 
-All_lines_sex <- ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
-   facet_nested(Age_at_infection ~ Lit_lifespan)+
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_hline(yintercept = 0, linetype = 2) +
-   geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
-   geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
-   scale_y_continuous("coefficient (BLUD ~ Sex)",
-                      limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
-   scale_x_continuous(limits = c(-4,4),
-                      breaks=c(seq(-4,4,by=2)))+
-   geom_point(aes(colour = Age_at_infection), size =3) +
-   scale_colour_manual("Age",
-                       values = c("darkgreen", "darkorchid"))+
-   geom_text(aes(label = paste(Female_n)), nudge_y = 0.8,size = 7)+
-   geom_text(aes(label = paste(Male_n)), nudge_y = -0.8,size = 7)+
-   theme_light()+
-   theme(legend.position = "none",
-         strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
-         aspect.ratio = 1)
-All_lines_sex
+My interpretation of these plots is:
 
-ggsave("output/All_lines_Sex.pdf", All_lines_sex, height = 6, width = 6)
-```
+* Points in upper left quadrant: Young individuals are more susceptible due to lower tolerance 
+* Points in upper right quadrant: Aged individuals  are more susceptible due to lower resistance
+* Points in lower right quadrant: Aged individuals  are more susceptible due to lower tolerance
+* Points in lower left quadrant: Young individuals  are more susceptible due to lower resistance
 
-
-```{r BLUD modelling Age, echo=FALSE }
+```{r BLUD modelling Age, include=FALSE, warning=FALSE}
 
 load("data/lPLUDage.RData")
 
@@ -744,7 +676,7 @@ surv_blud <-
 
 ```
 
-```{r Cox analysis Age}
+```{r Cox analysis Age, warning=FALSE, fig.cap= "Age effects on BLUD for female-biased and non-dimorphic lines"}
 # Repeat with model with Age as the term 
 # For block control, do cox separately and fit block as a random effect:
 
@@ -803,26 +735,32 @@ Line_lifespan <-
           Old_n = ifelse(Old < 5, paste("*"), paste(" "))) %>% 
    select(c(1:3, 6:7))
 
+
 BLUD_error <- merge(blud_mean_diff, lPLUDage)
-Hazard_Blud <- merge(total_agepersex_effs.age, merge(BLUD_error, Line_lifespan, by=c("Line", "Sex")),  by=c("Line", "Sex"))
+
+Hazard_Blud <- merge(total_agepersex_effs.age, merge(BLUD_error, merge(lifespan_beta_counts, Line_lifespan, 
+                                               by=c("Line"), all.x = T), by=c("Line", "Sex")), 
+                                               by=c("Line", "Sex"))
 Hazard_Blud$se <- as.numeric(Hazard_Blud$se) 
-Hazard_Blud$Sex <- as.factor(Hazard_Blud$Sex) 
+Hazard_Blud$Sex<- as.factor(Hazard_Blud$Sex) 
+Hazard_Blud$Lifespan_actual <- as.factor(Hazard_Blud$Lifespan_actual) 
+
 
 library(ggh4x)
 
 # Female_biased
-pFB <- ggplot(subset(Hazard_Blud, Lit_lifespan == "Female_biased"), aes(beta, PLUD), scale="globalminmax") +
+pFB <- ggplot(subset(Hazard_Blud, Lifespan_actual == "Female_biased"), aes(beta, PLUD), scale="globalminmax") +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
-   scale_y_continuous("coefficient (BLUD ~ Age)",
+   scale_y_continuous("BLUD coeff",
                       limits = c(-2,3),
-                      breaks=c(seq(-2,2,by=1)))+
+                      breaks=c(seq(-2,3,by=1)))+
    scale_x_continuous(limits = c(-1,4),
                       breaks=c(seq(-1,4,by=1)))+
-   facet_nested(~Lit_lifespan+Line)+
-   geom_point(aes(colour = Sex), size =2) +
+   facet_nested(~Lifespan_actual+Line)+
+   geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
    geom_text(aes(label = paste(Young_n)), nudge_y = 1.5,size = 7)+
    geom_text(aes(label = paste(Old_n)), nudge_y = -1,size = 7)+
@@ -830,98 +768,190 @@ pFB <- ggplot(subset(Hazard_Blud, Lit_lifespan == "Female_biased"), aes(beta, PL
    theme(legend.position = "none",
          strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1)
-   
 
 # non dimorphic
-pND <- ggplot(subset(Hazard_Blud, Lit_lifespan == "Non_dimorphic"), aes(beta, PLUD), scale="globalminmax") +
+pND <- 
+  ggplot(subset(Hazard_Blud, Lifespan_actual == "Non_dimorphic"), aes(beta, PLUD), scale="globalminmax") +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
-   scale_y_continuous("coefficient (BLUD ~ Age)",
+   scale_y_continuous("BLUD coeff",
                       limits = c(-2,3),
                       breaks=c(seq(-2,3,by=1)))+
    scale_x_continuous(limits = c(-1,4),
                       breaks=c(seq(-1,4,by=1)))+
-   facet_nested(~Lit_lifespan+Line)+
-   geom_point(aes(colour = Sex), size =3) +
+   facet_nested(~Lifespan_actual+Line)+
+   geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
    geom_text(aes(label = paste(Young_n)), nudge_y = 1.5,size = 7)+
    geom_text(aes(label = paste(Old_n)), nudge_y = -1,size = 7)+
    theme_light()+
    theme(strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1,
-         legend.position = "bottom",
+         legend.position = "none",
          legend.text = element_text(size = 12, face = "bold"))
-# Combine plots
-Cox_BLUD_coeff_AGE <- plot_grid(pFB, pND, nrow = 2)
-ggsave("output/Cox_BLUD_coeff_AGE.pdf", Cox_BLUD_coeff_AGE, width = 9, height = 7)
+
+Cox_BLUD_coeff_AGE <- 
+  ggpubr::ggarrange(pFB, pND, 
+                    common.legend = T,
+                    legend = "bottom",
+                  align = "hv", # Align them both, horizontal and vertical
+                  nrow = 1)
+Cox_BLUD_coeff_AGE
+   
+
 
 ```
 
-```{r Age beta and coeffiecients for all lines as replicates, warning=F, echo=F,}
+```{r coxph analysis Age male_biased, warning=FALSE, fig.cap="Age effects on BLUD for male-biased lines"}
 
-All_lines_age <- ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
-   facet_nested(Sex ~ Lit_lifespan)+
+pMB <- grid.arrange(
+  ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased" &
+                   Line %in% c("732", "821", "897", "907")), aes(beta, PLUD), scale="globalminmax") +
   geom_vline(xintercept = 0, linetype = 2) +
   geom_hline(yintercept = 0, linetype = 2) +
    geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
    geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
-   scale_y_continuous("coefficient (BLUD ~ Age)",
+   scale_y_continuous("BLUD coeff",
                       limits = c(-2,3),
                       breaks=c(seq(-2,3,by=1)))+
    scale_x_continuous(limits = c(-1,4),
                       breaks=c(seq(-1,4,by=1)))+
-   geom_point(aes(colour = Sex), size =3) +
+   facet_nested(~Lifespan_actual+Line)+
+   geom_point(aes(colour = Sex), size =2.5) +
+   scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
+   geom_text(aes(label = paste(Young_n)), nudge_y = 1.5,size = 7)+
+   geom_text(aes(label = paste(Old_n)), nudge_y = -1,size = 7)+
+   theme_light()+
+   theme(strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
+         aspect.ratio = 1,
+         legend.position = "none",
+         legend.text = element_text(size = 12, face = "bold")),
+  ggplot(subset(Hazard_Blud, Lifespan_actual == "Male_biased" &
+                   Line %in% c("59", "386", "517", "730")), aes(beta, PLUD), scale="globalminmax") +
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_hline(yintercept = 0, linetype = 2) +
+   geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
+   geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
+   scale_y_continuous("BLUD coeff",
+                      limits = c(-2,3),
+                      breaks=c(seq(-2,3,by=1)))+
+   scale_x_continuous(limits = c(-1,4),
+                      breaks=c(seq(-1,4,by=1)))+
+   facet_nested(~Lifespan_actual+Line)+
+   geom_point(aes(colour = Sex), size =2.5) +
+   scale_colour_manual(values = c("firebrick", "deepskyblue1"))+
+   geom_text(aes(label = paste(Young_n)), nudge_y = 1.5,size = 7)+
+   geom_text(aes(label = paste(Old_n)), nudge_y = -1,size = 7)+
+   theme_light()+
+   theme(strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
+         aspect.ratio = 1,
+         legend.position = "none",
+         legend.text = element_text(size = 12, face = "bold")),
+  nrow=2)
+pMB
+
+
+```
+
+
+# Age-effects with all lines plotted as replicates 
+
+* An unsurprising effect of age in all cases.
+* Older males of male-biased lines seem to be more neatly divided into lower tolerance or lower resistance whereas females are a mixture of both.
+
+
+```{r Age beta and coeffiecients for all lines as replicates, warning=FALSE, echo=FALSE, fig.cap="Age effects on BLUD for all lines"}
+
+All_lines_age <- ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
+   facet_nested(Sex ~ Lifespan_actual)+
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_hline(yintercept = 0, linetype = 2) +
+   geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
+   geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
+   scale_y_continuous("BLUD coeff",
+                      limits = c(-2,3),
+                      breaks=c(seq(-2,3,by=1)))+
+   scale_x_continuous(limits = c(-1,4),
+                      breaks=c(seq(-1,4,by=1)))+
+   geom_point(aes(colour = Sex), size =2.5) +
    scale_colour_manual("Sex",
                        values = c("firebrick", "deepskyblue1"))+
    geom_text(aes(label = paste(Young_n)), nudge_y = 1.5,size = 7)+
    geom_text(aes(label = paste(Old_n)), nudge_y = -1,size = 7)+
    theme_light()+
-   theme(legend.position = "none",
+   theme(legend.position = "bottom",
          strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
          aspect.ratio = 1)
 All_lines_age
 
-ggsave("output/All_lines_age.png", All_lines_age, width = 6, height = 6)
-```
-
-```{r All BLUD, echo=F, fig.cap= "All BLUD data"}
-
-   stat.test <- 
-      surv_blud %>%
-      group_by(Line) %>%
-      wilcox_test(log_BLUD ~ Group) %>%
-      adjust_pvalue(method = "bonferroni") %>%
-      add_significance() %>% 
-      add_xy_position(x = "Group") 
-   stat.test
-
-allBLUDplot <- 
-   ggplot(surv_blud, aes(x=Group, y=log_BLUD))+
-   facet_wrap(~Line)+
-   geom_boxplot(aes(colour = as.factor(Sex), fill = as.factor(Sex)),
-                outlier.shape = NA,
-                alpha = 0.4)+
-   geom_point(aes(colour = as.factor(Sex)),
-              position = position_jitterdodge(dodge.width = 0.8),
-              alpha = 0.6,
-              size = 1)+
-   scale_color_manual("Sex", 
-                      values = c("coral", "steelblue4"))+
-   scale_fill_manual("Sex", 
-                      values = c("coral", "steelblue4"))+
-   scale_y_continuous(ylab)+
-   scale_x_discrete("Group")+
-   ggtitle(paste("BLUD data for all Lines"))+
-   labs(subtitle = "Tolerance estimates between the sexes at young and old",
-        colour = "Sex")+
-   theme_linedraw()+
-   theme(axis.text.x = element_text(angle = 45, hjust = 0.9))
-allBLUDplot
 
 ```
 
 
+# Sex-effects with all lines plotted as replicates 
 
+* Males are more susceptible at 10days old in female-biased lines, but this is seen also in non-dimorphic lines.
+* Trends are mixed in male-biased lines.
+* Effects tend to be greater at 10days old, but still see a spread in survival among male-biased lines. 
 
+```{r Sex beta and coeffiecients for all lines as replicates, echo=FALSE, warning=FALSE, fig.cap="Sex effects on BLUD for all lines"}
+
+total_sex_effs.age <- rbind(sex.coxme.age.effs821, sex.cox.age.effs)
+
+# Create dataframe with line and expected lifespan for faceting
+Line_lifespan <- 
+   surv_blud %>% 
+   select(c(4,6,26)) %>% 
+   mutate(Lit_lifespan = recode(Lit_lifespan, FB ="Female_biased", ND ="Non_dimorphic")) %>% 
+   separate(Main_Group, c("Line", "Sex", "Age_at_infection")) %>% 
+   distinct() %>% 
+   pivot_wider(names_from = Sex, values_from = Sample_size) %>% 
+   mutate(Female_n = ifelse(Female < 5, paste("*"), paste(" ")),
+          Male_n = ifelse(Male < 5, paste("*"), paste(" "))) %>% 
+   select(c(1:3, 6:7))
+
+blud_mean_diff <-
+   surv_blud %>%   
+   select(c(5,9,11,25)) %>% 
+   mutate(across(Age_at_infection, factor)) %>% 
+   filter(!is.na(log_BLUD)) %>% 
+   dplyr::group_by(Line, Sex, Age_at_infection) %>%
+   dplyr::summarise(mean_BLUD = mean(log_BLUD)) %>% 
+   pivot_wider(names_from = Sex, values_from = mean_BLUD) %>% 
+   mutate(SexDiff = Female - Male)
+
+# merge the lplud estimates for confidence intervals
+BLUD_error <- merge(blud_mean_diff, lPLUD)
+
+Hazard_Blud <- merge(total_sex_effs.age, merge(BLUD_error, merge(lifespan_beta_counts, Line_lifespan, 
+                                               by=c("Line"), all.x = T), by=c("Line", "Age_at_infection")), 
+                                               by=c("Line", "Age_at_infection"))
+Hazard_Blud$se <- as.numeric(Hazard_Blud$se) 
+Hazard_Blud$Age_at_infection <- as.factor(Hazard_Blud$Age_at_infection) 
+Hazard_Blud$Lifespan_actual <- as.factor(Hazard_Blud$Lifespan_actual)
+
+All_lines_sex <- ggplot(Hazard_Blud, aes(beta, PLUD), scale="globalminmax") +
+   facet_nested(Age_at_infection ~ Lifespan_actual)+
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_hline(yintercept = 0, linetype = 2) +
+   geom_errorbarh(aes(xmin = beta-se, xmax = beta+se),height =0.2)+
+   geom_errorbar(aes(ymax = PLUD_CI_sup, ymin = PLUD_CI_inf),width=0.2)+
+   scale_y_continuous("BLUD coeff",
+                      limits = c(-4,4),
+                      breaks=c(seq(-4,4,by=2)))+
+   scale_x_continuous(limits = c(-4,4),
+                      breaks=c(seq(-4,4,by=2)))+
+   geom_point(aes(colour = Age_at_infection), size =2.5) +
+   scale_colour_manual("Age",
+                       values = c("darkgreen", "darkorchid"))+
+   geom_text(aes(label = paste(Female_n)), nudge_y = 0.8,size = 7)+
+   geom_text(aes(label = paste(Male_n)), nudge_y = -0.8,size = 7)+
+   theme_light()+
+   theme(legend.position = "bottom",
+         strip.text.x = element_text(size = 10, face = "bold", colour = "black"),
+         aspect.ratio = 1)
+All_lines_sex
+
+```
